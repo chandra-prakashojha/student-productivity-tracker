@@ -1,109 +1,45 @@
-const { ObjectId } = require("mongodb");
-const { getCollection } = require("../config/db");
+const studentService = require("../services/studentService");
 const asyncHandler = require("../middleware/asyncHandler");
 
-// CREATE STUDENT
-const createStudent = asyncHandler(async (req, res) => {
-  const students = getCollection("students");
-  const { name, role } = req.body;
 
-  if (!name || !role) {
-    const error = new Error("Name and role are required");
-    error.status = 400;
-    throw error;
-  }
+// Create Student
+exports.createStudent = asyncHandler(async (req, res) => {
 
-  const result = await students.insertOne({
-    name,
-    role,
-    createdAt: new Date(),
-    createdBy: new ObjectId(req.user.id),
-  });
+  const student = await studentService.createStudentService(req.body);
 
   res.status(201).json({
     message: "Student created successfully",
-    id: result.insertedId,
-  });
-});
-
-// GET ALL STUDENTS (ONLY LOGGED USER)
-const getStudents = asyncHandler(async (req, res) => {
-  const students = getCollection("students");
-
-  const data = await students
-    .find({ createdBy: new ObjectId(req.user.id) })
-    .toArray();
-
-  res.json(data);
-});
-
-// GET SINGLE STUDENT
-const getStudentById = asyncHandler(async (req, res) => {
-  const students = getCollection("students");
-  const { id } = req.params;
-
-  const student = await students.findOne({
-    _id: new ObjectId(id),
-    createdBy: new ObjectId(req.user.id),
+    student
   });
 
-  if (!student) {
-    const error = new Error("Student not found or not authorized");
-    error.status = 404;
-    throw error;
-  }
-
-  res.json(student);
 });
 
-// UPDATE STUDENT
-const updateStudent = asyncHandler(async (req, res) => {
-  const students = getCollection("students");
-  const { id } = req.params;
-  const { name, role } = req.body;
 
-  const result = await students.updateOne(
-    {
-      _id: new ObjectId(id),
-      createdBy: new ObjectId(req.user.id),
-    },
-    {
-      $set: { name, role },
-    }
-  );
 
-  if (result.matchedCount === 0) {
-    const error = new Error("Student not found or not authorized");
-    error.status = 404;
-    throw error;
-  }
+// Get Students
+exports.getStudents = asyncHandler(async (req, res) => {
 
-  res.json({ message: "Student updated successfully" });
-});
+  const students = await studentService.getStudentsService();
 
-// DELETE STUDENT
-const deleteStudent = asyncHandler(async (req, res) => {
-  const students = getCollection("students");
-  const { id } = req.params;
-
-  const result = await students.deleteOne({
-    _id: new ObjectId(id),
-    createdBy: new ObjectId(req.user.id),
+  res.json({
+    message: "Students fetched successfully",
+    students
   });
 
-  if (result.deletedCount === 0) {
-    const error = new Error("Student not found or not authorized");
-    error.status = 404;
-    throw error;
-  }
-
-  res.json({ message: "Student deleted successfully" });
 });
 
-module.exports = {
-  createStudent,
-  getStudents,
-  getStudentById,
-  updateStudent,
-  deleteStudent,
-};
+
+
+// Update Student
+exports.updateStudent = asyncHandler(async (req, res) => {
+
+  const { id } = req.params;
+
+  const student = await studentService.updateStudentService(id, req.body);
+
+  res.json({
+    message: "Student updated successfully",
+    student
+  });
+
+});
