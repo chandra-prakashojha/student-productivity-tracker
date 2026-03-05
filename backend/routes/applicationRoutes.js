@@ -2,22 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  createApplication,
   getApplications,
-  updateApplicationStatus,
-  deleteApplication
+  createApplication,
+  deleteApplication,
+  getRecentApplications
 } = require("../controllers/applicationController");
 
-const { protect } = require("../middleware/authMiddleware");
-
-
-router.post("/", protect, createApplication);
-
-router.get("/", protect, getApplications);
-
-router.patch("/:id/status", protect, updateApplicationStatus);
-
-router.delete("/:id", protect, deleteApplication);
-
+router.get("/recent", getRecentApplications);
+router.get("/", getApplications);
+router.post("/", createApplication);
+router.delete("/:id", deleteApplication);
 
 module.exports = router;

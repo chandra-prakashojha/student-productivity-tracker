@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 
 const connectDB = require("./config/db");
 
@@ -16,33 +17,40 @@ const rateLimiter = require("./middleware/rateLimiter");
 const app = express();
 
 
-// connect database
+// CONNECT DATABASE
 connectDB();
 
 
-// middlewares
+// ⭐ ENABLE CORS (MUST BE FIRST)
+app.use(cors());
+
+
+// ⭐ BODY PARSER
 app.use(express.json());
+
+
+// LOGGER
 app.use(morgan("dev"));
 
 
-// rate limiter
+// ⭐ RATE LIMITER (AFTER CORS)
 app.use(rateLimiter);
 
 
-// routes
+// ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 
-// health route
+// HEALTH ROUTE
 app.get("/", (req, res) => {
   res.send("Placement Tracker API Running");
 });
 
 
-// error handler
+// ERROR HANDLER
 app.use(errorHandler);
 
 

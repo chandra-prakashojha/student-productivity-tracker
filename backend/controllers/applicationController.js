@@ -1,62 +1,93 @@
-const applicationService = require("../services/applicationService");
-const asyncHandler = require("../middleware/asyncHandler");
+const Application = require("../models/Application");
 
 
-// Create Application
-exports.createApplication = asyncHandler(async (req, res) => {
+// GET ALL APPLICATIONS
+exports.getApplications = async (req, res) => {
+  try {
 
-  const application = await applicationService.createApplicationService(req.body);
+    const applications = await Application.find().sort({ createdAt: -1 });
 
-  res.status(201).json({
-    message: "Application created successfully",
-    application
-  });
+    res.json(applications);
 
-});
+  } catch (err) {
 
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
 
-
-// Get Applications
-exports.getApplications = asyncHandler(async (req, res) => {
-
-  const result = await applicationService.getApplicationsService(req.query);
-
-  res.json({
-    message: "Applications fetched successfully",
-    ...result
-  });
-
-});
+  }
+};
 
 
 
-// Update Application Status
-exports.updateApplicationStatus = asyncHandler(async (req, res) => {
+// CREATE APPLICATION
+exports.createApplication = async (req, res) => {
 
-  const { id } = req.params;
-  const { status } = req.body;
+  try {
 
-  const application = await applicationService.updateApplicationStatusService(id, status);
+    const { company, role, status } = req.body;
 
-  res.json({
-    message: "Application status updated successfully",
-    application
-  });
+    if (!company || !role) {
+      return res.status(400).json({ message: "Company and role required" });
+    }
 
-});
+    const application = new Application({
+      company,
+      role,
+      status
+    });
+
+    const savedApplication = await application.save();
+
+    res.status(201).json(savedApplication);
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+
+  }
+
+};
 
 
 
-// Delete Application
-exports.deleteApplication = asyncHandler(async (req, res) => {
+// DELETE APPLICATION
+exports.deleteApplication = async (req, res) => {
 
-  const { id } = req.params;
+  try {
 
-  const application = await applicationService.deleteApplicationService(id);
+    await Application.findByIdAndDelete(req.params.id);
 
-  res.json({
-    message: "Application deleted successfully",
-    application
-  });
+    res.json({ message: "Application deleted" });
 
-});
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+
+  }
+
+};
+
+
+
+// GET RECENT APPLICATIONS
+exports.getRecentApplications = async (req, res) => {
+
+  try {
+
+    const apps = await Application
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json(apps);
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+
+  }
+
+};
