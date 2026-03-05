@@ -1,97 +1,180 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import {
   getApplications,
   createApplication,
-  deleteApplication
+  deleteApplication,
+  updateApplication
 } from "../api/applicationApi";
+import { AppContext } from "../context/AppContext";
 
 const Applications = () => {
 
-  const [applications, setApplications] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const { triggerDashboardRefresh } = useContext(AppContext);
 
-  const [form, setForm] = useState({
-    company: "",
-    role: "",
-    status: "Applied"
+  const [applications,setApplications] = useState([]);
+  const [showModal,setShowModal] = useState(false);
+  const [editingId,setEditingId] = useState(null);
+
+  const [search,setSearch] = useState("");
+  const [statusFilter,setStatusFilter] = useState("");
+
+  const [currentPage,setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const [form,setForm] = useState({
+    company:"",
+    role:"",
+    status:"Applied"
   });
 
+
   const fetchApplications = async () => {
-    try {
+
+    try{
       const data = await getApplications();
       setApplications(data);
-    } catch (err) {
+    }catch(err){
       console.log(err);
     }
+
   };
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
 
-  const handleChange = (e) => {
+  useEffect(()=>{
+    fetchApplications();
+  },[]);
+
+
+
+  const handleChange = (e)=>{
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]:e.target.value
     });
   };
 
-  const handleSubmit = async (e) => {
+
+
+  const handleSubmit = async (e)=>{
+
     e.preventDefault();
 
-    try {
+    try{
 
-      await createApplication(form);
+      if(editingId){
+
+        await updateApplication(editingId,form);
+        setEditingId(null);
+
+      }else{
+
+        await createApplication(form);
+
+      }
 
       setForm({
-        company: "",
-        role: "",
-        status: "Applied"
+        company:"",
+        role:"",
+        status:"Applied"
       });
 
       setShowModal(false);
 
+      triggerDashboardRefresh();
+
       fetchApplications();
 
-    } catch (err) {
+    }catch(err){
       console.log(err);
     }
+
   };
 
-  const handleDelete = async (id) => {
+
+
+  const handleEdit = (app)=>{
+
+    setForm({
+      company:app.company,
+      role:app.role,
+      status:app.status
+    });
+
+    setEditingId(app._id);
+
+    setShowModal(true);
+
+  };
+
+
+
+  const handleDelete = async (id)=>{
 
     const confirmDelete = window.confirm("Delete this application?");
-
     if(!confirmDelete) return;
 
-    try {
+    try{
 
       await deleteApplication(id);
 
+      triggerDashboardRefresh();
+
       fetchApplications();
 
-    } catch (err) {
+    }catch(err){
       console.log(err);
     }
+
   };
 
-  return (
+
+
+  /* SEARCH + FILTER */
+
+  const filteredApplications = applications.filter(app=>{
+
+    const matchesSearch =
+      app.company.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "" || app.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+
+  });
+
+
+
+  /* PAGINATION */
+
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+
+  const currentApplications =
+    filteredApplications.slice(indexOfFirst,indexOfLast);
+
+  const totalPages =
+    Math.ceil(filteredApplications.length / itemsPerPage);
+
+
+
+  return(
 
     <DashboardLayout>
 
-      <div style={{ padding: "30px" }}>
+      <div style={{padding:"30px"}}>
 
         <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "20px"
+          display:"flex",
+          justifyContent:"space-between",
+          marginBottom:"20px"
         }}>
 
           <h2>Applications</h2>
 
           <button
-            onClick={() => setShowModal(true)}
+            onClick={()=>setShowModal(true)}
             style={addButton}
           >
             + Add Application
@@ -99,27 +182,60 @@ const Applications = () => {
 
         </div>
 
+
+
+        {/* Search + Filter */}
+
+        <div style={filterContainer}>
+
+          <input
+            placeholder="Search company..."
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
+            style={searchInput}
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(e)=>setStatusFilter(e.target.value)}
+            style={searchInput}
+          >
+            <option value="">All Status</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+
+        </div>
+
+
+
         <div style={tableContainer}>
 
           <table style={table}>
 
             <thead>
+
               <tr>
                 <th align="left">Company</th>
                 <th align="left">Role</th>
                 <th align="left">Status</th>
-                <th align="left">Action</th>
+                <th align="left">Actions</th>
               </tr>
+
             </thead>
 
             <tbody>
 
-              {applications.length === 0 ? (
+              {currentApplications.length === 0 ?(
+
                 <tr>
-                  <td colSpan="4">No applications yet</td>
+                  <td colSpan="4">No applications found</td>
                 </tr>
-              ) : (
-                applications.map((app) => (
+
+              ):(
+                currentApplications.map(app=>(
                   <tr key={app._id}>
 
                     <td>{app.company}</td>
@@ -133,12 +249,21 @@ const Applications = () => {
                     </td>
 
                     <td>
+
+                      <button
+                        style={editBtn}
+                        onClick={()=>handleEdit(app)}
+                      >
+                        Edit
+                      </button>
+
                       <button
                         style={deleteBtn}
-                        onClick={() => handleDelete(app._id)}
+                        onClick={()=>handleDelete(app._id)}
                       >
                         Delete
                       </button>
+
                     </td>
 
                   </tr>
@@ -151,18 +276,47 @@ const Applications = () => {
 
         </div>
 
+
+
+        {/* Pagination */}
+
+        <div style={paginationContainer}>
+
+          <button
+            disabled={currentPage === 1}
+            onClick={()=>setCurrentPage(prev=>prev-1)}
+            style={pageBtn}
+          >
+            Previous
+          </button>
+
+          <span>
+            Page {currentPage} of {totalPages || 1}
+          </span>
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={()=>setCurrentPage(prev=>prev+1)}
+            style={pageBtn}
+          >
+            Next
+          </button>
+
+        </div>
+
       </div>
+
 
 
       {/* Modal */}
 
-      {showModal && (
+      {showModal &&(
 
         <div style={modalOverlay}>
 
           <div style={modal}>
 
-            <h3>Add Application</h3>
+            <h3>{editingId ? "Edit Application" : "Add Application"}</h3>
 
             <form onSubmit={handleSubmit}>
 
@@ -196,7 +350,7 @@ const Applications = () => {
                 <option value="Rejected">Rejected</option>
               </select>
 
-              <div style={{ marginTop: "15px" }}>
+              <div style={{marginTop:"15px"}}>
 
                 <button type="submit" style={saveBtn}>
                   Save
@@ -204,7 +358,7 @@ const Applications = () => {
 
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={()=>setShowModal(false)}
                   style={cancelBtn}
                 >
                   Cancel
@@ -227,101 +381,142 @@ const Applications = () => {
 };
 
 
+
 /* styles */
 
 const addButton = {
-  background: "#3b82f6",
-  color: "white",
-  border: "none",
-  padding: "10px 16px",
-  borderRadius: "6px",
-  cursor: "pointer"
+  background:"#3b82f6",
+  color:"white",
+  border:"none",
+  padding:"10px 16px",
+  borderRadius:"6px",
+  cursor:"pointer"
+};
+
+const filterContainer = {
+  display:"flex",
+  gap:"10px",
+  marginBottom:"20px"
+};
+
+const searchInput = {
+  padding:"8px",
+  background:"#0f172a",
+  border:"1px solid #334155",
+  borderRadius:"6px",
+  color:"white"
 };
 
 const tableContainer = {
-  background: "#111827",
-  padding: "20px",
-  borderRadius: "10px"
+  background:"#111827",
+  padding:"20px",
+  borderRadius:"10px"
 };
 
 const table = {
-  width: "100%",
-  color: "white"
+  width:"100%",
+  color:"white"
+};
+
+const editBtn = {
+  background:"#2563eb",
+  border:"none",
+  padding:"6px 12px",
+  marginRight:"8px",
+  color:"white",
+  borderRadius:"4px",
+  cursor:"pointer"
 };
 
 const deleteBtn = {
-  background: "#ef4444",
-  border: "none",
-  padding: "6px 12px",
-  color: "white",
-  borderRadius: "4px",
-  cursor: "pointer"
+  background:"#ef4444",
+  border:"none",
+  padding:"6px 12px",
+  color:"white",
+  borderRadius:"4px",
+  cursor:"pointer"
 };
 
-const statusBadge = (status) => {
+const paginationContainer = {
+  display:"flex",
+  justifyContent:"space-between",
+  marginTop:"20px",
+  alignItems:"center"
+};
 
-  const colors = {
-    Applied: "#2563eb",
-    Interview: "#f59e0b",
-    Offer: "#10b981",
-    Rejected: "#ef4444"
+const pageBtn = {
+  background:"#2563eb",
+  border:"none",
+  padding:"6px 12px",
+  color:"white",
+  borderRadius:"4px",
+  cursor:"pointer"
+};
+
+const statusBadge = (status)=>{
+
+  const colors={
+    Applied:"#2563eb",
+    Interview:"#f59e0b",
+    Offer:"#10b981",
+    Rejected:"#ef4444"
   };
 
-  return {
-    background: colors[status] || "#64748b",
-    padding: "4px 10px",
-    borderRadius: "999px",
-    fontSize: "12px"
+  return{
+    background:colors[status] || "#64748b",
+    padding:"4px 10px",
+    borderRadius:"999px",
+    fontSize:"12px"
   };
 
 };
 
 const modalOverlay = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  background: "rgba(0,0,0,0.6)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1000
+  position:"fixed",
+  top:0,
+  left:0,
+  width:"100%",
+  height:"100%",
+  background:"rgba(0,0,0,0.6)",
+  display:"flex",
+  alignItems:"center",
+  justifyContent:"center",
+  zIndex:1000
 };
 
 const modal = {
-  background: "#020617",
-  padding: "30px",
-  borderRadius: "10px",
-  width: "320px",
-  color: "white"
+  background:"#020617",
+  padding:"30px",
+  borderRadius:"10px",
+  width:"320px",
+  color:"white"
 };
 
 const input = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "10px",
-  background: "#0f172a",
-  border: "1px solid #334155",
-  borderRadius: "6px",
-  color: "white"
+  width:"100%",
+  padding:"10px",
+  marginTop:"10px",
+  background:"#0f172a",
+  border:"1px solid #334155",
+  borderRadius:"6px",
+  color:"white"
 };
 
 const saveBtn = {
-  background: "#10b981",
-  border: "none",
-  padding: "8px 12px",
-  marginRight: "10px",
-  color: "white",
-  cursor: "pointer"
+  background:"#10b981",
+  border:"none",
+  padding:"8px 12px",
+  marginRight:"10px",
+  color:"white",
+  cursor:"pointer"
 };
 
 const cancelBtn = {
-  background: "#ef4444",
-  border: "none",
-  padding: "8px 12px",
-  color: "white",
-  cursor: "pointer"
+  background:"#ef4444",
+  border:"none",
+  padding:"8px 12px",
+  color:"white",
+  cursor:"pointer"
 };
 
 export default Applications;

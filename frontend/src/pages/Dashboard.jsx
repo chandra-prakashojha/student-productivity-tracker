@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getDashboardStats } from "../api/dashboardApi";
 import { getRecentApplications } from "../api/applicationApi";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { AppContext } from "../context/AppContext";
 
 import {
   PieChart,
@@ -13,6 +14,8 @@ import {
 
 const Dashboard = () => {
 
+  const { refreshDashboard } = useContext(AppContext);
+
   const [stats,setStats] = useState({
     students:0,
     applications:0,
@@ -23,52 +26,65 @@ const Dashboard = () => {
 
   const [recentApps,setRecentApps] = useState([]);
 
+  const fetchStats = async () => {
+
+    try{
+
+      const data = await getDashboardStats();
+      setStats(data);
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
+
+  const fetchRecentApps = async () => {
+
+    try{
+
+      const data = await getRecentApplications();
+      setRecentApps(data);
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
+
   useEffect(()=>{
 
-    const loadData = async () => {
+    fetchStats();
+    fetchRecentApps();
 
-      try{
+  },[refreshDashboard]);
 
-        const statsData = await getDashboardStats();
-        if(statsData) setStats(statsData);
-
-      }catch(err){
-        console.log("Stats error",err);
-      }
-
-      try{
-
-        const recentData = await getRecentApplications();
-        if(Array.isArray(recentData)){
-          setRecentApps(recentData);
-        }
-
-      }catch(err){
-        console.log("Recent apps error",err);
-      }
-
-    };
-
-    loadData();
-
-  },[]);
 
   const chartData = [
 
-    { name:"Applied", value:stats.applications || 0 },
-    { name:"Interview", value:stats.interviews || 0 },
-    { name:"Offer", value:stats.offers || 0 },
+    { name:"Applied", value:stats.applications },
+    { name:"Interview", value:stats.interviews },
+    { name:"Offer", value:stats.offers },
     { name:"Rejected", value:stats.rejected || 0 }
 
   ];
 
+
   const COLORS = ["#2563eb","#f59e0b","#10b981","#ef4444"];
+
 
   return(
 
     <DashboardLayout>
 
       <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
+
 
       {/* Stats Cards */}
 
@@ -100,6 +116,7 @@ const Dashboard = () => {
         </div>
 
       </div>
+
 
       {/* Chart */}
 
@@ -147,7 +164,9 @@ const Dashboard = () => {
         width:"500px"
       }}>
 
-        <h3 style={{marginBottom:"20px"}}>Recent Applications</h3>
+        <h3 style={{marginBottom:"20px"}}>
+          Recent Applications
+        </h3>
 
         <table style={{width:"100%",color:"white"}}>
 
@@ -163,15 +182,14 @@ const Dashboard = () => {
 
           <tbody>
 
-            {recentApps.length === 0 ? (
+            {recentApps.length === 0 ?(
 
               <tr>
                 <td colSpan="3">No recent applications</td>
               </tr>
 
-            ) : (
-
-              recentApps.map(app => (
+            ):(
+              recentApps.map(app =>(
 
                 <tr key={app._id}>
                   <td>{app.company}</td>
@@ -180,7 +198,6 @@ const Dashboard = () => {
                 </tr>
 
               ))
-
             )}
 
           </tbody>
@@ -194,6 +211,7 @@ const Dashboard = () => {
   );
 
 };
+
 
 const card = {
 
