@@ -130,6 +130,60 @@ const Applications = () => {
 
 
 
+  /* EXPORT CSV */
+
+  const exportCSV = () => {
+
+    if(applications.length === 0){
+      alert("No applications to export");
+      return;
+    }
+
+    const headers = ["Company","Role","Status"];
+
+    const rows = applications.map(app => [
+      app.company,
+      app.role,
+      app.status
+    ]);
+
+    let csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers, ...rows]
+        .map(e => e.join(","))
+        .join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+
+    const link = document.createElement("a");
+
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "applications.csv");
+
+    document.body.appendChild(link);
+
+    link.click();
+
+  };
+
+
+
+  /* STATUS COUNTERS */
+
+  const statusCounts = {
+
+    Applied: applications.filter(a => a.status === "Applied").length,
+
+    Interview: applications.filter(a => a.status === "Interview").length,
+
+    Offer: applications.filter(a => a.status === "Offer").length,
+
+    Rejected: applications.filter(a => a.status === "Rejected").length
+
+  };
+
+
+
   /* SEARCH + FILTER */
 
   const filteredApplications = applications.filter(app=>{
@@ -173,12 +227,47 @@ const Applications = () => {
 
           <h2>Applications</h2>
 
-          <button
-            onClick={()=>setShowModal(true)}
-            style={addButton}
-          >
-            + Add Application
-          </button>
+          <div style={{display:"flex",gap:"10px"}}>
+
+            <button
+              onClick={exportCSV}
+              style={exportButton}
+            >
+              Export CSV
+            </button>
+
+            <button
+              onClick={()=>setShowModal(true)}
+              style={addButton}
+            >
+              + Add Application
+            </button>
+
+          </div>
+
+        </div>
+
+
+
+        {/* STATUS COUNTERS */}
+
+        <div style={statusContainer}>
+
+          <div style={statusCard("#2563eb")}>
+            Applied: {statusCounts.Applied}
+          </div>
+
+          <div style={statusCard("#f59e0b")}>
+            Interview: {statusCounts.Interview}
+          </div>
+
+          <div style={statusCard("#10b981")}>
+            Offer: {statusCounts.Offer}
+          </div>
+
+          <div style={statusCard("#ef4444")}>
+            Rejected: {statusCounts.Rejected}
+          </div>
 
         </div>
 
@@ -210,6 +299,8 @@ const Applications = () => {
         </div>
 
 
+
+        {/* Table */}
 
         <div style={tableContainer}>
 
@@ -308,7 +399,7 @@ const Applications = () => {
 
 
 
-      {/* Modal */}
+      {/* MODAL */}
 
       {showModal &&(
 
@@ -382,9 +473,9 @@ const Applications = () => {
 
 
 
-/* styles */
+/* STYLES */
 
-const addButton = {
+const addButton={
   background:"#3b82f6",
   color:"white",
   border:"none",
@@ -393,13 +484,38 @@ const addButton = {
   cursor:"pointer"
 };
 
-const filterContainer = {
+const exportButton={
+  background:"#10b981",
+  color:"white",
+  border:"none",
+  padding:"10px 16px",
+  borderRadius:"6px",
+  cursor:"pointer"
+};
+
+const statusContainer={
+  display:"grid",
+  gridTemplateColumns:"repeat(4,1fr)",
+  gap:"15px",
+  marginBottom:"25px"
+};
+
+const statusCard=(color)=>({
+  background:"#0f172a",
+  padding:"15px",
+  borderRadius:"8px",
+  textAlign:"center",
+  borderLeft:`4px solid ${color}`,
+  fontWeight:"bold"
+});
+
+const filterContainer={
   display:"flex",
   gap:"10px",
   marginBottom:"20px"
 };
 
-const searchInput = {
+const searchInput={
   padding:"8px",
   background:"#0f172a",
   border:"1px solid #334155",
@@ -407,18 +523,18 @@ const searchInput = {
   color:"white"
 };
 
-const tableContainer = {
+const tableContainer={
   background:"#111827",
   padding:"20px",
   borderRadius:"10px"
 };
 
-const table = {
+const table={
   width:"100%",
   color:"white"
 };
 
-const editBtn = {
+const editBtn={
   background:"#2563eb",
   border:"none",
   padding:"6px 12px",
@@ -428,7 +544,7 @@ const editBtn = {
   cursor:"pointer"
 };
 
-const deleteBtn = {
+const deleteBtn={
   background:"#ef4444",
   border:"none",
   padding:"6px 12px",
@@ -437,14 +553,14 @@ const deleteBtn = {
   cursor:"pointer"
 };
 
-const paginationContainer = {
+const paginationContainer={
   display:"flex",
   justifyContent:"space-between",
   marginTop:"20px",
   alignItems:"center"
 };
 
-const pageBtn = {
+const pageBtn={
   background:"#2563eb",
   border:"none",
   padding:"6px 12px",
@@ -453,7 +569,7 @@ const pageBtn = {
   cursor:"pointer"
 };
 
-const statusBadge = (status)=>{
+const statusBadge=(status)=>{
 
   const colors={
     Applied:"#2563eb",
@@ -463,7 +579,7 @@ const statusBadge = (status)=>{
   };
 
   return{
-    background:colors[status] || "#64748b",
+    background:colors[status]||"#64748b",
     padding:"4px 10px",
     borderRadius:"999px",
     fontSize:"12px"
@@ -471,7 +587,7 @@ const statusBadge = (status)=>{
 
 };
 
-const modalOverlay = {
+const modalOverlay={
   position:"fixed",
   top:0,
   left:0,
@@ -484,7 +600,7 @@ const modalOverlay = {
   zIndex:1000
 };
 
-const modal = {
+const modal={
   background:"#020617",
   padding:"30px",
   borderRadius:"10px",
@@ -492,7 +608,7 @@ const modal = {
   color:"white"
 };
 
-const input = {
+const input={
   width:"100%",
   padding:"10px",
   marginTop:"10px",
@@ -502,7 +618,7 @@ const input = {
   color:"white"
 };
 
-const saveBtn = {
+const saveBtn={
   background:"#10b981",
   border:"none",
   padding:"8px 12px",
@@ -511,7 +627,7 @@ const saveBtn = {
   cursor:"pointer"
 };
 
-const cancelBtn = {
+const cancelBtn={
   background:"#ef4444",
   border:"none",
   padding:"8px 12px",

@@ -11,36 +11,50 @@ const Login = () => {
     password:""
   });
 
+  const [loading,setLoading] = useState(false);
+
   const handleChange = (e) => {
 
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]:e.target.value
     });
 
   };
+
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    try {
+    try{
+
+      setLoading(true);
 
       const res = await API.post("/auth/login",form);
 
+      // save token
       localStorage.setItem("token",res.data.token);
+
+      // save user (important for role based UI)
+      localStorage.setItem("user",JSON.stringify(res.data.user));
 
       navigate("/dashboard");
 
-    } catch(err) {
+    }catch(err){
 
-      alert(err.response?.data?.message || "Invalid credentials");
+      alert(err.response?.data?.message || "Login failed");
+
+    }finally{
+
+      setLoading(false);
 
     }
 
   };
 
-  return (
+
+  return(
 
     <div style={container}>
 
@@ -74,8 +88,12 @@ const Login = () => {
             required
           />
 
-          <button style={button}>
-            Login
+          <button
+            type="submit"
+            style={button}
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
 
         </form>
@@ -94,6 +112,9 @@ const Login = () => {
   );
 
 };
+
+
+/* styles */
 
 const container = {
   height:"100vh",
