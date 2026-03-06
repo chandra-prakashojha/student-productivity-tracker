@@ -1,13 +1,50 @@
 const Application = require("../models/Application");
+const Company = require("../models/Company");
 
 
-// GET ALL APPLICATIONS
+
+/*
+=====================================
+GET APPLICATIONS (WITH FILTER + PAGINATION)
+=====================================
+*/
 exports.getApplications = async (req, res) => {
+
   try {
 
-    const applications = await Application.find().sort({ createdAt: -1 });
+    const { page = 1, limit = 10, status, search } = req.query;
 
-    res.json(applications);
+    const query = {};
+
+    // filter by status
+    if (status) {
+      query.status = status;
+    }
+
+    // search by company name
+    if (search) {
+      const companies = await Company.find({
+        name: { $regex: search, $options: "i" }
+      });
+
+      query.companyId = { $in: companies.map(c => c._id) };
+    }
+
+    const applications = await Application
+      .find(query)
+      .populate("companyId")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Application.countDocuments(query);
+
+    res.json({
+      applications,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit)
+    });
 
   } catch (err) {
 
@@ -19,26 +56,43 @@ exports.getApplications = async (req, res) => {
 
 
 
-// CREATE APPLICATION
+/*
+=====================================
+CREATE APPLICATION
+=====================================
+*/
 exports.createApplication = async (req, res) => {
 
   try {
 
-    const { company, role, status } = req.body;
+    const { companyId, role, status } = req.body;
 
-    if (!company || !role) {
-      return res.status(400).json({ message: "Company and role required" });
+    if (!companyId || !role) {
+      return res.status(400).json({
+        message: "Company and role required"
+      });
+    }
+
+    // check if company exists
+    const company = await Company.findById(companyId);
+
+    if (!company) {
+      return res.status(404).json({
+        message: "Company not found"
+      });
     }
 
     const application = new Application({
-      company,
+      companyId,
       role,
       status
     });
 
     const savedApplication = await application.save();
 
-    res.status(201).json(savedApplication);
+    const populatedApplication = await savedApplication.populate("companyId");
+
+    res.status(201).json(populatedApplication);
 
   } catch (err) {
 
@@ -51,12 +105,62 @@ exports.createApplication = async (req, res) => {
 
 
 
-// DELETE APPLICATION
+/*
+=====================================
+UPDATE APPLICATION
+=====================================
+*/
+exports.updateApplication = async (req, res) => {
+
+  try {
+
+    const { companyId, role, status } = req.body;
+
+    const updatedApplication = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        companyId,
+        role,
+        status
+      },
+      { new: true }
+    ).populate("companyId");
+
+    if (!updatedApplication) {
+      return res.status(404).json({
+        message: "Application not found"
+      });
+    }
+
+    res.json(updatedApplication);
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+
+  }
+
+};
+
+
+
+/*
+=====================================
+DELETE APPLICATION
+=====================================
+*/
 exports.deleteApplication = async (req, res) => {
 
   try {
 
-    await Application.findByIdAndDelete(req.params.id);
+    const deleted = await Application.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Application not found"
+      });
+    }
 
     res.json({ message: "Application deleted" });
 
@@ -71,13 +175,18 @@ exports.deleteApplication = async (req, res) => {
 
 
 
-// GET RECENT APPLICATIONS
+/*
+=====================================
+GET RECENT APPLICATIONS
+=====================================
+*/
 exports.getRecentApplications = async (req, res) => {
 
   try {
 
     const apps = await Application
       .find()
+      .populate("companyId")
       .sort({ createdAt: -1 })
       .limit(5);
 

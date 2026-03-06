@@ -1,3 +1,6 @@
+import Companies from "./pages/Companies";
+
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
@@ -17,6 +20,7 @@ function App() {
       <Routes>
 
         {/* Public Routes */}
+        <Route path="/companies" element={<Companies />} />
 
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />

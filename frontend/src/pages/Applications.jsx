@@ -29,11 +29,22 @@ const Applications = () => {
   });
 
 
+  /* FETCH APPLICATIONS */
+
   const fetchApplications = async () => {
 
     try{
-      const data = await getApplications();
-      setApplications(data);
+
+      const res = await getApplications();
+
+      const apps =
+        res?.applications ||
+        res?.data?.applications ||
+        res?.data ||
+        [];
+
+      setApplications(Array.isArray(apps) ? apps : []);
+
     }catch(err){
       console.log(err);
     }
@@ -96,7 +107,7 @@ const Applications = () => {
   const handleEdit = (app)=>{
 
     setForm({
-      company:app.company,
+      company:app.company || app.companyId?.name || "",
       role:app.role,
       status:app.status
     });
@@ -142,7 +153,7 @@ const Applications = () => {
     const headers = ["Company","Role","Status"];
 
     const rows = applications.map(app => [
-      app.company,
+      app.company || app.companyId?.name || "",
       app.role,
       app.status
     ]);
@@ -188,8 +199,11 @@ const Applications = () => {
 
   const filteredApplications = applications.filter(app=>{
 
+    const companyName =
+      app.company || app.companyId?.name || "";
+
     const matchesSearch =
-      app.company.toLowerCase().includes(search.toLowerCase());
+      companyName.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
       statusFilter === "" || app.status === statusFilter;
@@ -326,10 +340,12 @@ const Applications = () => {
                 </tr>
 
               ):(
+
                 currentApplications.map(app=>(
+
                   <tr key={app._id}>
 
-                    <td>{app.company}</td>
+                    <td>{app.company || app.companyId?.name}</td>
 
                     <td>{app.role}</td>
 
@@ -358,7 +374,9 @@ const Applications = () => {
                     </td>
 
                   </tr>
+
                 ))
+
               )}
 
             </tbody>

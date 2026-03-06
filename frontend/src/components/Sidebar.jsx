@@ -1,4 +1,4 @@
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
 
@@ -6,7 +6,7 @@ const Sidebar = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleLogout = ()=>{
+  const handleLogout = () => {
 
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -15,23 +15,22 @@ const Sidebar = () => {
 
   };
 
-  return(
+  return (
 
     <div style={sidebarStyle}>
 
-      <h2 style={{marginBottom:"30px"}}>
+      <h2 style={{ marginBottom: "30px" }}>
         Placement Tracker
       </h2>
 
-      <nav style={{display:"flex",flexDirection:"column",gap:"15px"}}>
+      <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
 
         <Link to="/dashboard" style={linkStyle}>
           Dashboard
         </Link>
 
         {/* Only admin sees students */}
-
-        {user?.role === "admin" &&(
+        {user?.role === "admin" && (
 
           <Link to="/students" style={linkStyle}>
             Students
@@ -41,6 +40,11 @@ const Sidebar = () => {
 
         <Link to="/applications" style={linkStyle}>
           Applications
+        </Link>
+
+        {/* ⭐ NEW PAGE */}
+        <Link to="/companies" style={linkStyle}>
+          Companies
         </Link>
 
         <button
@@ -58,31 +62,31 @@ const Sidebar = () => {
 
 };
 
-const sidebarStyle={
-  width:"220px",
-  height:"100vh",
-  background:"#020617",
-  padding:"30px",
-  color:"white",
-  borderRight:"1px solid #1e293b",
-  position:"fixed"
+const sidebarStyle = {
+  width: "220px",
+  height: "100vh",
+  background: "#020617",
+  padding: "30px",
+  color: "white",
+  borderRight: "1px solid #1e293b",
+  position: "fixed"
 };
 
-const linkStyle={
-  color:"white",
-  textDecoration:"none",
-  padding:"8px",
-  borderRadius:"6px"
+const linkStyle = {
+  color: "white",
+  textDecoration: "none",
+  padding: "8px",
+  borderRadius: "6px"
 };
 
-const logoutButton={
-  marginTop:"20px",
-  padding:"8px",
-  background:"#ef4444",
-  border:"none",
-  borderRadius:"6px",
-  color:"white",
-  cursor:"pointer"
+const logoutButton = {
+  marginTop: "20px",
+  padding: "8px",
+  background: "#ef4444",
+  border: "none",
+  borderRadius: "6px",
+  color: "white",
+  cursor: "pointer"
 };
 
 export default Sidebar;
