@@ -83,11 +83,17 @@ exports.createApplication = async (req, res) => {
     }
 
     const application = new Application({
-      companyId,
-      role,
-      status
-    });
-
+  companyId,
+  role,
+  status,
+  history:[
+    {
+      status: status || "Applied"
+    }
+  ]
+});
+    
+    
     const savedApplication = await application.save();
 
     const populatedApplication = await savedApplication.populate("companyId");
@@ -110,40 +116,46 @@ exports.createApplication = async (req, res) => {
 UPDATE APPLICATION
 =====================================
 */
-exports.updateApplication = async (req, res) => {
+exports.updateApplication = async (req,res)=>{
 
-  try {
+  try{
 
     const { companyId, role, status } = req.body;
 
-    const updatedApplication = await Application.findByIdAndUpdate(
-      req.params.id,
-      {
-        companyId,
-        role,
-        status
-      },
-      { new: true }
-    ).populate("companyId");
+    const application = await Application.findById(req.params.id);
 
-    if (!updatedApplication) {
-      return res.status(404).json({
-        message: "Application not found"
-      });
+    if(!application){
+      return res.status(404).json({ message:"Application not found" });
     }
 
-    res.json(updatedApplication);
+    /* Track history if status changed */
 
-  } catch (err) {
+    if(status && status !== application.status){
+
+      application.history.push({
+        status
+      });
+
+    }
+
+    application.companyId = companyId;
+    application.role = role;
+    application.status = status;
+
+    await application.save();
+
+    const populated = await application.populate("companyId");
+
+    res.json(populated);
+
+  }catch(err){
 
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message:"Server error" });
 
   }
 
 };
-
-
 
 /*
 =====================================

@@ -1,11 +1,10 @@
-import Companies from "./pages/Companies";
-
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Applications from "./pages/Applications";
+import Pipeline from "./pages/Pipeline";
+import Companies from "./pages/Companies";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -20,8 +19,6 @@ function App() {
       <Routes>
 
         {/* Public Routes */}
-        <Route path="/companies" element={<Companies />} />
-
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -54,8 +51,25 @@ function App() {
           }
         />
 
-        {/* Fallback */}
+        <Route
+          path="/pipeline"
+          element={
+            <ProtectedRoute>
+              <Pipeline />
+            </ProtectedRoute>
+          }
+        />
 
+        <Route
+          path="/companies"
+          element={
+            <ProtectedRoute>
+              <Companies />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
 
       </Routes>

@@ -41,6 +41,9 @@ const Sidebar = () => {
         <Link to="/applications" style={linkStyle}>
           Applications
         </Link>
+        <Link to="/pipeline" style={linkStyle}>
+  Pipeline
+</Link>
 
         {/* ⭐ NEW PAGE */}
         <Link to="/companies" style={linkStyle}>

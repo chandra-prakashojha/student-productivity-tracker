@@ -36,7 +36,22 @@ const applicationSchema = new mongoose.Schema(
   notes: {
     type: String,
     default: ""
-  }
+  },
+
+  /* ⭐ NEW FIELD: STATUS HISTORY (for pipeline timeline) */
+
+  history: [
+    {
+      status: {
+        type: String,
+        enum: ["Applied", "Interview", "Offer", "Rejected"]
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 
 },
 {

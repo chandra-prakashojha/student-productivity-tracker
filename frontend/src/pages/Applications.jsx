@@ -84,40 +84,51 @@ const Applications = () => {
   };
 
 
-  const handleSubmit = async (e)=>{
+  const handleSubmit = async (e) => {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    try{
+  try {
 
-      if(editingId){
+    if (editingId) {
 
-        await updateApplication(editingId,form);
-        setEditingId(null);
-
-      }else{
-
-        await createApplication(form);
-
-      }
-
-      setForm({
-        companyId:"",
-        role:"",
-        status:"Applied"
+      await updateApplication(editingId, {
+        companyId: form.companyId,
+        role: form.role,
+        status: form.status
       });
 
-      setShowModal(false);
+      setEditingId(null);
 
-      triggerDashboardRefresh();
+    } else {
 
-      fetchApplications();
+      await createApplication({
+        companyId: form.companyId,
+        role: form.role,
+        status: form.status
+      });
 
-    }catch(err){
-      console.log(err);
     }
 
-  };
+    setForm({
+      companyId: "",
+      role: "",
+      status: "Applied"
+    });
+
+    setShowModal(false);
+
+    triggerDashboardRefresh();
+
+    fetchApplications();
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+};
 
 
   const handleEdit = (app)=>{
