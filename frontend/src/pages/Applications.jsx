@@ -6,6 +6,7 @@ import {
   deleteApplication,
   updateApplication
 } from "../api/applicationApi";
+import { getCompanies } from "../api/companyApi";
 import { AppContext } from "../context/AppContext";
 
 const Applications = () => {
@@ -13,6 +14,8 @@ const Applications = () => {
   const { triggerDashboardRefresh } = useContext(AppContext);
 
   const [applications,setApplications] = useState([]);
+  const [companies,setCompanies] = useState([]);
+
   const [showModal,setShowModal] = useState(false);
   const [editingId,setEditingId] = useState(null);
 
@@ -23,11 +26,10 @@ const Applications = () => {
   const itemsPerPage = 10;
 
   const [form,setForm] = useState({
-    company:"",
+    companyId:"",
     role:"",
     status:"Applied"
   });
-
 
   /* FETCH APPLICATIONS */
 
@@ -35,12 +37,13 @@ const Applications = () => {
 
     try{
 
-      const res = await getApplications();
+      const data = await getApplications();
 
       const apps =
-        res?.applications ||
-        res?.data?.applications ||
-        res?.data ||
+        data?.applications ||
+        data?.data?.applications ||
+        data?.data ||
+        data ||
         [];
 
       setApplications(Array.isArray(apps) ? apps : []);
@@ -51,11 +54,26 @@ const Applications = () => {
 
   };
 
+  /* FETCH COMPANIES */
+
+  const fetchCompanies = async () => {
+
+    try{
+
+      const data = await getCompanies();
+
+      setCompanies(Array.isArray(data) ? data : []);
+
+    }catch(err){
+      console.log(err);
+    }
+
+  };
 
   useEffect(()=>{
     fetchApplications();
+    fetchCompanies();
   },[]);
-
 
 
   const handleChange = (e)=>{
@@ -64,7 +82,6 @@ const Applications = () => {
       [e.target.name]:e.target.value
     });
   };
-
 
 
   const handleSubmit = async (e)=>{
@@ -85,7 +102,7 @@ const Applications = () => {
       }
 
       setForm({
-        company:"",
+        companyId:"",
         role:"",
         status:"Applied"
       });
@@ -103,11 +120,10 @@ const Applications = () => {
   };
 
 
-
   const handleEdit = (app)=>{
 
     setForm({
-      company:app.company || app.companyId?.name || "",
+      companyId:app.companyId?._id || app.companyId || "",
       role:app.role,
       status:app.status
     });
@@ -117,7 +133,6 @@ const Applications = () => {
     setShowModal(true);
 
   };
-
 
 
   const handleDelete = async (id)=>{
@@ -140,7 +155,6 @@ const Applications = () => {
   };
 
 
-
   /* EXPORT CSV */
 
   const exportCSV = () => {
@@ -153,7 +167,11 @@ const Applications = () => {
     const headers = ["Company","Role","Status"];
 
     const rows = applications.map(app => [
-      app.company || app.companyId?.name || "",
+
+      app.companyId?.name ||
+      companies.find(c => c._id === app.companyId)?.name ||
+      "Unknown",
+
       app.role,
       app.status
     ]);
@@ -178,21 +196,16 @@ const Applications = () => {
   };
 
 
-
   /* STATUS COUNTERS */
 
   const statusCounts = {
 
     Applied: applications.filter(a => a.status === "Applied").length,
-
     Interview: applications.filter(a => a.status === "Interview").length,
-
     Offer: applications.filter(a => a.status === "Offer").length,
-
     Rejected: applications.filter(a => a.status === "Rejected").length
 
   };
-
 
 
   /* SEARCH + FILTER */
@@ -200,7 +213,9 @@ const Applications = () => {
   const filteredApplications = applications.filter(app=>{
 
     const companyName =
-      app.company || app.companyId?.name || "";
+      app.companyId?.name ||
+      companies.find(c => c._id === app.companyId)?.name ||
+      "";
 
     const matchesSearch =
       companyName.toLowerCase().includes(search.toLowerCase());
@@ -213,7 +228,6 @@ const Applications = () => {
   });
 
 
-
   /* PAGINATION */
 
   const indexOfLast = currentPage * itemsPerPage;
@@ -224,7 +238,6 @@ const Applications = () => {
 
   const totalPages =
     Math.ceil(filteredApplications.length / itemsPerPage);
-
 
 
   return(
@@ -262,60 +275,6 @@ const Applications = () => {
         </div>
 
 
-
-        {/* STATUS COUNTERS */}
-
-        <div style={statusContainer}>
-
-          <div style={statusCard("#2563eb")}>
-            Applied: {statusCounts.Applied}
-          </div>
-
-          <div style={statusCard("#f59e0b")}>
-            Interview: {statusCounts.Interview}
-          </div>
-
-          <div style={statusCard("#10b981")}>
-            Offer: {statusCounts.Offer}
-          </div>
-
-          <div style={statusCard("#ef4444")}>
-            Rejected: {statusCounts.Rejected}
-          </div>
-
-        </div>
-
-
-
-        {/* Search + Filter */}
-
-        <div style={filterContainer}>
-
-          <input
-            placeholder="Search company..."
-            value={search}
-            onChange={(e)=>setSearch(e.target.value)}
-            style={searchInput}
-          />
-
-          <select
-            value={statusFilter}
-            onChange={(e)=>setStatusFilter(e.target.value)}
-            style={searchInput}
-          >
-            <option value="">All Status</option>
-            <option value="Applied">Applied</option>
-            <option value="Interview">Interview</option>
-            <option value="Offer">Offer</option>
-            <option value="Rejected">Rejected</option>
-          </select>
-
-        </div>
-
-
-
-        {/* Table */}
-
         <div style={tableContainer}>
 
           <table style={table}>
@@ -340,12 +299,15 @@ const Applications = () => {
                 </tr>
 
               ):(
-
                 currentApplications.map(app=>(
 
                   <tr key={app._id}>
 
-                    <td>{app.company || app.companyId?.name}</td>
+                    <td>
+                      {app.companyId?.name ||
+                       companies.find(c => c._id === app.companyId)?.name ||
+                       "Unknown"}
+                    </td>
 
                     <td>{app.role}</td>
 
@@ -376,7 +338,6 @@ const Applications = () => {
                   </tr>
 
                 ))
-
               )}
 
             </tbody>
@@ -385,39 +346,8 @@ const Applications = () => {
 
         </div>
 
-
-
-        {/* Pagination */}
-
-        <div style={paginationContainer}>
-
-          <button
-            disabled={currentPage === 1}
-            onClick={()=>setCurrentPage(prev=>prev-1)}
-            style={pageBtn}
-          >
-            Previous
-          </button>
-
-          <span>
-            Page {currentPage} of {totalPages || 1}
-          </span>
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={()=>setCurrentPage(prev=>prev+1)}
-            style={pageBtn}
-          >
-            Next
-          </button>
-
-        </div>
-
       </div>
 
-
-
-      {/* MODAL */}
 
       {showModal &&(
 
@@ -429,14 +359,25 @@ const Applications = () => {
 
             <form onSubmit={handleSubmit}>
 
-              <input
-                name="company"
-                placeholder="Company"
-                value={form.company}
+              <select
+                name="companyId"
+                value={form.companyId}
                 onChange={handleChange}
                 required
                 style={input}
-              />
+              >
+
+                <option value="">Select Company</option>
+
+                {companies.map(company => (
+
+                  <option key={company._id} value={company._id}>
+                    {company.name}
+                  </option>
+
+                ))}
+
+              </select>
 
               <input
                 name="role"
@@ -490,7 +431,6 @@ const Applications = () => {
 };
 
 
-
 /* STYLES */
 
 const addButton={
@@ -509,36 +449,6 @@ const exportButton={
   padding:"10px 16px",
   borderRadius:"6px",
   cursor:"pointer"
-};
-
-const statusContainer={
-  display:"grid",
-  gridTemplateColumns:"repeat(4,1fr)",
-  gap:"15px",
-  marginBottom:"25px"
-};
-
-const statusCard=(color)=>({
-  background:"#0f172a",
-  padding:"15px",
-  borderRadius:"8px",
-  textAlign:"center",
-  borderLeft:`4px solid ${color}`,
-  fontWeight:"bold"
-});
-
-const filterContainer={
-  display:"flex",
-  gap:"10px",
-  marginBottom:"20px"
-};
-
-const searchInput={
-  padding:"8px",
-  background:"#0f172a",
-  border:"1px solid #334155",
-  borderRadius:"6px",
-  color:"white"
 };
 
 const tableContainer={
@@ -564,22 +474,6 @@ const editBtn={
 
 const deleteBtn={
   background:"#ef4444",
-  border:"none",
-  padding:"6px 12px",
-  color:"white",
-  borderRadius:"4px",
-  cursor:"pointer"
-};
-
-const paginationContainer={
-  display:"flex",
-  justifyContent:"space-between",
-  marginTop:"20px",
-  alignItems:"center"
-};
-
-const pageBtn={
-  background:"#2563eb",
   border:"none",
   padding:"6px 12px",
   color:"white",
