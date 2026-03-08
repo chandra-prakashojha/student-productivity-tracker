@@ -38,7 +38,7 @@ const applicationSchema = new mongoose.Schema(
     default: ""
   },
 
-  /* ⭐ NEW FIELD: STATUS HISTORY (for pipeline timeline) */
+  /* STATUS HISTORY (for timeline tracking) */
 
   history: [
     {
@@ -60,7 +60,26 @@ const applicationSchema = new mongoose.Schema(
 );
 
 
-// compound index for faster dashboard queries
+/* COMPOUND INDEX */
 applicationSchema.index({ userId: 1, status: 1 });
+
+
+/* AUTO ADD FIRST HISTORY ENTRY */
+
+applicationSchema.pre("save", function(next){
+
+  if(this.isNew){
+
+    this.history.push({
+      status: this.status,
+      date: new Date()
+    });
+
+  }
+
+  next();
+
+});
+
 
 module.exports = mongoose.model("Application", applicationSchema);

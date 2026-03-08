@@ -1,214 +1,194 @@
 const Application = require("../models/Application");
 const Company = require("../models/Company");
 
+ /*
 
+# GET APPLICATIONS
 
-/*
-=====================================
-GET APPLICATIONS (WITH FILTER + PAGINATION)
-=====================================
 */
 exports.getApplications = async (req, res) => {
 
-  try {
+try {
 
-    const { page = 1, limit = 10, status, search } = req.query;
 
-    const query = {};
+const applications = await Application
+  .find()
+  .populate("companyId")
+  .sort({ createdAt: -1 });
 
-    // filter by status
-    if (status) {
-      query.status = status;
-    }
+res.json({ applications });
 
-    // search by company name
-    if (search) {
-      const companies = await Company.find({
-        name: { $regex: search, $options: "i" }
-      });
 
-      query.companyId = { $in: companies.map(c => c._id) };
-    }
+} catch (err) {
 
-    const applications = await Application
-      .find(query)
-      .populate("companyId")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
 
-    const total = await Application.countDocuments(query);
+console.error(err);
+res.status(500).json({ message: "Server error" });
 
-    res.json({
-      applications,
-      total,
-      page: parseInt(page),
-      pages: Math.ceil(total / limit)
-    });
 
-  } catch (err) {
+}
 
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-
-  }
 };
 
+ /*
 
+# CREATE APPLICATION
 
-/*
-=====================================
-CREATE APPLICATION
-=====================================
 */
 exports.createApplication = async (req, res) => {
 
-  try {
+try {
 
-    const { companyId, role, status } = req.body;
 
-    if (!companyId || !role) {
-      return res.status(400).json({
-        message: "Company and role required"
-      });
-    }
+const { companyId, role, status } = req.body;
 
-    // check if company exists
-    const company = await Company.findById(companyId);
+if (!companyId || !role) {
 
-    if (!company) {
-      return res.status(404).json({
-        message: "Company not found"
-      });
-    }
+  return res.status(400).json({
+    message: "Company and role required"
+  });
 
-    const application = new Application({
+}
+
+const application = new Application({
   companyId,
   role,
-  status,
-  history:[
-    {
-      status: status || "Applied"
-    }
-  ]
+  status
 });
-    
-    
-    const savedApplication = await application.save();
 
-    const populatedApplication = await savedApplication.populate("companyId");
+const saved = await application.save();
 
-    res.status(201).json(populatedApplication);
+const populated =
+  await saved.populate("companyId");
 
-  } catch (err) {
+res.status(201).json(populated);
 
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
 
-  }
+} catch (err) {
+
+
+console.error(err);
+res.status(500).json({ message: "Server error" });
+
+
+}
 
 };
 
+ /*
 
+# UPDATE APPLICATION
 
-/*
-=====================================
-UPDATE APPLICATION
-=====================================
 */
-exports.updateApplication = async (req,res)=>{
+exports.updateApplication = async (req, res) => {
 
-  try{
+try {
 
-    const { companyId, role, status } = req.body;
+let { companyId, role, status, notes } = req.body;
 
-    const application = await Application.findById(req.params.id);
+/* Fix populated object issue */
+if (typeof companyId === "object" && companyId !== null) {
+  companyId = companyId._id;
+}
 
-    if(!application){
-      return res.status(404).json({ message:"Application not found" });
-    }
+const updatedApplication =
+  await Application.findByIdAndUpdate(
+    req.params.id,
+    {
+      companyId,
+      role,
+      status,
+      notes
+    },
+    { new: true }
+  ).populate("companyId");
 
-    /* Track history if status changed */
+if (!updatedApplication) {
 
-    if(status && status !== application.status){
+  return res.status(404).json({
+    message: "Application not found"
+  });
 
-      application.history.push({
-        status
-      });
+}
 
-    }
+res.json(updatedApplication);
 
-    application.companyId = companyId;
-    application.role = role;
-    application.status = status;
 
-    await application.save();
+} catch (err) {
 
-    const populated = await application.populate("companyId");
 
-    res.json(populated);
+console.error("Update error:", err);
 
-  }catch(err){
+res.status(500).json({
+  message: "Server error"
+});
 
-    console.error(err);
-    res.status(500).json({ message:"Server error" });
 
-  }
+}
 
 };
 
-/*
-=====================================
-DELETE APPLICATION
-=====================================
+ /*
+
+# DELETE APPLICATION
+
 */
 exports.deleteApplication = async (req, res) => {
 
-  try {
+try {
 
-    const deleted = await Application.findByIdAndDelete(req.params.id);
 
-    if (!deleted) {
-      return res.status(404).json({
-        message: "Application not found"
-      });
-    }
+const deleted =
+  await Application.findByIdAndDelete(req.params.id);
 
-    res.json({ message: "Application deleted" });
+if (!deleted) {
 
-  } catch (err) {
+  return res.status(404).json({
+    message: "Application not found"
+  });
 
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+}
 
-  }
+res.json({ message: "Application deleted" });
+
+
+} catch (err) {
+
+
+console.error(err);
+res.status(500).json({ message: "Server error" });
+
+
+}
 
 };
 
-
-
 /*
-=====================================
-GET RECENT APPLICATIONS
-=====================================
+
+# GET RECENT APPLICATIONS
+
 */
 exports.getRecentApplications = async (req, res) => {
 
-  try {
+try {
 
-    const apps = await Application
-      .find()
-      .populate("companyId")
-      .sort({ createdAt: -1 })
-      .limit(5);
 
-    res.json(apps);
+const apps = await Application
+  .find()
+  .populate("companyId")
+  .sort({ createdAt: -1 })
+  .limit(5);
 
-  } catch (err) {
+res.json(apps);
 
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
 
-  }
+} catch (err) {
+
+
+console.error(err);
+res.status(500).json({ message: "Server error" });
+
+
+}
 
 };
