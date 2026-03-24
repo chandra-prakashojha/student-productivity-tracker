@@ -1,4 +1,5 @@
 import API from "./axios";
+import axios from "axios";
 
 /* Get all applications */
 export const getApplications = async () => {
@@ -13,14 +14,16 @@ export const getApplications = async () => {
 
 
 /* Create a new application */
-export const createApplication = async (data) => {
-  try {
-    const res = await API.post("/applications", data);
-    return res.data;
-  } catch (err) {
-    console.error("Error creating application:", err);
-    throw err;
-  }
+export const createApplication = (data) => {
+  return axios.post(
+    "/api/applications",
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    }
+  );
 };
 
 
