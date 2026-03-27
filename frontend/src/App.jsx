@@ -1,13 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-
+import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Applications from "./pages/Applications";
 import Pipeline from "./pages/Pipeline";
 import Companies from "./pages/Companies";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
 import ApplicationDetails from "./pages/ApplicationDetails";
+import CompanyAnalytics from "./pages/CompanyAnalytics";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -19,9 +18,8 @@ function App() {
 
       <Routes>
 
-        {/* Public Routes */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* Public Route */}
+        <Route path="/auth" element={<AuthPage />} />
 
         {/* Protected Routes */}
 
@@ -53,6 +51,15 @@ function App() {
         />
 
         <Route
+          path="/applications/:id"
+          element={
+            <ProtectedRoute>
+              <ApplicationDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/pipeline"
           element={
             <ProtectedRoute>
@@ -70,11 +77,22 @@ function App() {
           }
         />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
- <Route path="/applications/:id" element={<ApplicationDetails />} />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <CompanyAnalytics />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/auth" />} />
+
+        {/* Fallback (KEEP LAST) */}
+        <Route path="*" element={<Navigate to="/auth" />} />
+
       </Routes>
-      
 
     </Router>
 
