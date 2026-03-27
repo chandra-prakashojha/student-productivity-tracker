@@ -7,6 +7,7 @@ import Pipeline from "./pages/Pipeline";
 import Companies from "./pages/Companies";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ApplicationDetails from "./pages/ApplicationDetails";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -71,8 +72,9 @@ function App() {
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
-
+ <Route path="/applications/:id" element={<ApplicationDetails />} />
       </Routes>
+      
 
     </Router>
 

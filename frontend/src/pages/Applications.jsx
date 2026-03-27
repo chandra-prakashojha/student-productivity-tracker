@@ -312,7 +312,11 @@ const Applications = () => {
               ):(
                 currentApplications.map(app=>(
 
-                  <tr key={app._id}>
+                 <tr
+  key={app._id}
+  style={{ cursor: "pointer" }}
+  onClick={() => window.location.href = `/applications/${app._id}`}
+>
 
                     <td>
                       {app.companyId?.name ||
