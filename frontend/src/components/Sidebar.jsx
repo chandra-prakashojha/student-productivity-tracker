@@ -1,93 +1,93 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
-
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
-
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    navigate("/");
-
+    navigate("/auth");
   };
 
   return (
-
     <div style={sidebarStyle}>
+      <h2 style={{ marginBottom: "40px" }}>Placement Tracker</h2>
 
-      <h2 style={{ marginBottom: "30px" }}>
-        Placement Tracker
-      </h2>
-
-      <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-
-        <Link to="/dashboard" style={linkStyle}>
+      <nav style={navStyle}>
+        <NavLink to="/dashboard" style={navLinkStyle}>
           Dashboard
-        </Link>
+        </NavLink>
 
-        {/* Only admin sees students */}
         {user?.role === "admin" && (
-
-          <Link to="/students" style={linkStyle}>
+          <NavLink to="/students" style={navLinkStyle}>
             Students
-          </Link>
-
+          </NavLink>
         )}
 
-        <Link to="/applications" style={linkStyle}>
+        <NavLink to="/applications" style={navLinkStyle}>
           Applications
-        </Link>
-        <Link to="/pipeline" style={linkStyle}>
-  Pipeline
-</Link>
+        </NavLink>
 
-        {/* ⭐ NEW PAGE */}
-        <Link to="/companies" style={linkStyle}>
+        <NavLink to="/pipeline" style={navLinkStyle}>
+          Pipeline
+        </NavLink>
+
+        <NavLink to="/companies" style={navLinkStyle}>
           Companies
-        </Link>
+        </NavLink>
 
-        <button
-          onClick={handleLogout}
-          style={logoutButton}
-        >
+        <button onClick={handleLogout} style={logoutButton}>
           Logout
         </button>
-
       </nav>
-
     </div>
-
   );
-
 };
+
+/* Sidebar container */
 
 const sidebarStyle = {
   width: "220px",
   height: "100vh",
   background: "#020617",
-  padding: "30px",
+  padding: "30px 20px",
   color: "white",
   borderRight: "1px solid #1e293b",
-  position: "fixed"
+  position: "fixed",
+  left: 0,
+  top: 0,
+  display: "flex",
+  flexDirection: "column"
 };
 
-const linkStyle = {
+/* Navigation container */
+
+const navStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "14px"
+};
+
+/* NavLink style */
+
+const navLinkStyle = ({ isActive }) => ({
   color: "white",
   textDecoration: "none",
-  padding: "8px",
-  borderRadius: "6px"
-};
+  padding: "10px 12px",
+  borderRadius: "8px",
+  background: isActive ? "#1e293b" : "transparent",
+  transition: "0.2s"
+});
+
+/* Logout button */
 
 const logoutButton = {
-  marginTop: "20px",
-  padding: "8px",
+  marginTop: "30px",
+  padding: "10px",
   background: "#ef4444",
   border: "none",
-  borderRadius: "6px",
+  borderRadius: "8px",
   color: "white",
   cursor: "pointer"
 };
