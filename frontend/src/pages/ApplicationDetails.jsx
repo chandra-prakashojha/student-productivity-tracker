@@ -8,6 +8,10 @@ const ApplicationDetails = () => {
 
   const [application, setApplication] = useState(null);
 
+  const [roundName, setRoundName] = useState("");
+  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState("");
+
   const fetchApplication = async () => {
     try {
 
@@ -31,6 +35,35 @@ const ApplicationDetails = () => {
     if (id) fetchApplication();
   }, [id]);
 
+  const handleAddRound = async () => {
+
+    try {
+
+      await axios.post(
+        `/api/applications/${id}/interview-round`,
+        {
+          roundName,
+          date,
+          notes
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
+
+      setRoundName("");
+      setDate("");
+      setNotes("");
+
+      fetchApplication();
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   if (!application) return <p>Loading...</p>;
 
   return (
@@ -48,7 +81,7 @@ const ApplicationDetails = () => {
   padding: "25px",
   borderRadius: "12px",
   boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
-}}></div>
+}}>
 
     <h2 style={{
   marginBottom: "20px",
@@ -69,14 +102,12 @@ const ApplicationDetails = () => {
   marginTop: "25px",
   marginBottom: "10px",
   color: "#38bdf8"
-  
 }}>
   Timeline
 </h3>
 
       <div style={{ position: "relative", marginTop: "20px" }}>
 
-        {/* vertical line */}
         <div style={{
           position: "absolute",
           left: "15px",
@@ -84,7 +115,6 @@ const ApplicationDetails = () => {
           bottom: 0,
           width: "2px",
           background: "#334155"
-          
         }} />
 
         {application.history?.length > 0 ? (
@@ -106,7 +136,6 @@ const ApplicationDetails = () => {
                 position: "relative"
               }}>
 
-                {/* circle */}
                 <div style={{
                   width: "30px",
                   height: "30px",
@@ -122,7 +151,6 @@ const ApplicationDetails = () => {
                   ✓
                 </div>
 
-                {/* content */}
                 <div style={{
                   marginLeft: "15px",
                   background: "#1e293b",
@@ -153,7 +181,113 @@ const ApplicationDetails = () => {
 
       </div>
 
+      {/* Interview Rounds Section */}
+
+      <h3 style={{
+        marginTop: "40px",
+        marginBottom: "10px",
+        color: "#38bdf8"
+      }}>
+        Interview Rounds
+      </h3>
+
+      <div style={{
+        background: "#1e293b",
+        padding: "15px",
+        borderRadius: "8px",
+        marginBottom: "20px"
+      }}>
+
+        <input
+          placeholder="Round Name (Technical / HR)"
+          value={roundName}
+          onChange={(e)=>setRoundName(e.target.value)}
+          style={{
+            width:"100%",
+            marginBottom:"10px",
+            padding:"8px",
+            borderRadius:"6px",
+            border:"none"
+          }}
+        />
+
+        <input
+          type="date"
+          value={date}
+          onChange={(e)=>setDate(e.target.value)}
+          style={{
+            width:"100%",
+            marginBottom:"10px",
+            padding:"8px",
+            borderRadius:"6px",
+            border:"none"
+          }}
+        />
+
+        <textarea
+          placeholder="Notes"
+          value={notes}
+          onChange={(e)=>setNotes(e.target.value)}
+          style={{
+            width:"100%",
+            marginBottom:"10px",
+            padding:"8px",
+            borderRadius:"6px",
+            border:"none"
+          }}
+        />
+
+        <button
+          onClick={handleAddRound}
+          style={{
+            background:"#38bdf8",
+            border:"none",
+            padding:"10px 15px",
+            borderRadius:"6px",
+            cursor:"pointer",
+            fontWeight:"bold"
+          }}
+        >
+          Add Interview Round
+        </button>
+
+      </div>
+
+      {/* Show Existing Rounds */}
+
+      {application.interviewRounds?.length > 0 ? (
+
+        application.interviewRounds.map((round,index)=>(
+          <div key={index} style={{
+            border:"1px solid #334155",
+            padding:"12px",
+            borderRadius:"8px",
+            marginBottom:"10px",
+            background:"#020617"
+          }}>
+
+            <strong>{round.roundName}</strong>
+
+            <p style={{fontSize:"13px",color:"#94a3b8"}}>
+              {new Date(round.date).toLocaleDateString()}
+            </p>
+
+            <p>Status: {round.status}</p>
+
+            <p>{round.notes}</p>
+
+          </div>
+        ))
+
+      ) : (
+
+        <p style={{color:"#94a3b8"}}>No interview rounds added yet</p>
+
+      )}
+
     </div>
+
+  </div>
 
   );
 };

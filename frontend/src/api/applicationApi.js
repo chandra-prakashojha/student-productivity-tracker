@@ -49,7 +49,8 @@ export const deleteApplication = async (id) => {
     throw err;
   }
 };
-
+export const addInterviewRound = (id, data) =>
+  axios.post(`/applications/${id}/interview-round`, data);
 
 /* Get recent applications (Dashboard) */
 export const getRecentApplications = async () => {
