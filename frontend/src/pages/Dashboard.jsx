@@ -1,24 +1,24 @@
 import { useEffect, useState, useContext } from "react";
 import {
-getDashboardStats,
-getApplicationTrend
+  getDashboardStats,
+  getApplicationTrend
 } from "../api/dashboardApi";
 import { getRecentApplications } from "../api/applicationApi";
-
+import UpcomingInterviews from "../components/UpcomingInterviews";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { AppContext } from "../context/AppContext";
 
 import {
-PieChart,
-Pie,
-Cell,
-Tooltip,
-Legend,
-LineChart,
-Line,
-XAxis,
-YAxis,
-CartesianGrid
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid
 } from "recharts";
 
 const Dashboard = () => {
@@ -40,7 +40,6 @@ const [loading,setLoading] = useState(true);
 
 const fetchStats = async () => {
 
-
 try{
   const data = await getDashboardStats();
   setStats(data);
@@ -48,11 +47,9 @@ try{
   console.log(err);
 }
 
-
 };
 
 const fetchRecentApps = async () => {
-
 
 try{
   const data = await getRecentApplications();
@@ -61,11 +58,9 @@ try{
   console.log(err);
 }
 
-
 };
 
 const fetchTrend = async () => {
-
 
 try{
   const data = await getApplicationTrend();
@@ -74,11 +69,9 @@ try{
   console.log(err);
 }
 
-
 };
 
 useEffect(()=>{
-
 
 const loadDashboard = async () => {
 
@@ -96,7 +89,6 @@ const loadDashboard = async () => {
 
 loadDashboard();
 
-
 },[refreshDashboard]);
 
 /* SUCCESS RATE CALCULATION */
@@ -107,14 +99,10 @@ stats.applications === 0
 : Math.round((stats.offers / stats.applications) * 100);
 
 const chartData=[
-
-
 { name:"Applied", value:stats.applications },
 { name:"Interview", value:stats.interviews },
 { name:"Offer", value:stats.offers },
 { name:"Rejected", value:stats.rejected }
-
-
 ];
 
 const COLORS=[
@@ -124,192 +112,181 @@ const COLORS=[
 "#ef4444"
 ];
 
-/* LOADING SKELETON */
+/* LOADING */
 
 if(loading){
 
-
 return(
 
-  <DashboardLayout>
+<DashboardLayout>
 
-    <h1 style={{marginBottom:"30px"}}>
-      Dashboard
-    </h1>
+<h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
-    <div style={statsGrid}>
-      <div style={skeletonCard}/>
-      <div style={skeletonCard}/>
-      <div style={skeletonCard}/>
-      <div style={skeletonCard}/>
-      <div style={skeletonCard}/>
-    </div>
+<div style={statsGrid}>
+<div style={skeletonCard}/>
+<div style={skeletonCard}/>
+<div style={skeletonCard}/>
+<div style={skeletonCard}/>
+<div style={skeletonCard}/>
+</div>
 
-    <div style={chartGrid}>
-      <div style={skeletonChart}/>
-      <div style={skeletonChart}/>
-    </div>
+<div style={chartGrid}>
+<div style={skeletonChart}/>
+<div style={skeletonChart}/>
+</div>
 
-  </DashboardLayout>
+</DashboardLayout>
 
 );
-
 
 }
 
 return(
 
-
 <DashboardLayout>
 
-  <h1 style={{marginBottom:"30px"}}>
-    Dashboard
-  </h1>
+<h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
+{/* Stats Cards */}
 
-  {/* Stats Cards */}
+<div style={statsGrid}>
 
-  <div style={statsGrid}>
+<div style={card}>
+<h3>Total Students</h3>
+<p>{stats.students}</p>
+</div>
 
-    <div style={card}>
-      <h3>Total Students</h3>
-      <p>{stats.students}</p>
-    </div>
+<div style={card}>
+<h3>Total Applications</h3>
+<p>{stats.applications}</p>
+</div>
 
-    <div style={card}>
-      <h3>Total Applications</h3>
-      <p>{stats.applications}</p>
-    </div>
+<div style={card}>
+<h3>Interviews</h3>
+<p>{stats.interviews}</p>
+</div>
 
-    <div style={card}>
-      <h3>Interviews</h3>
-      <p>{stats.interviews}</p>
-    </div>
+<div style={card}>
+<h3>Offers</h3>
+<p>{stats.offers}</p>
+</div>
 
-    <div style={card}>
-      <h3>Offers</h3>
-      <p>{stats.offers}</p>
-    </div>
+<div style={card}>
+<h3>Offer Rate</h3>
+<p>{successRate}%</p>
+</div>
 
-    <div style={card}>
-      <h3>Offer Rate</h3>
-      <p>{successRate}%</p>
-    </div>
+</div>
 
-  </div>
+{/* Charts */}
 
+<div style={chartGrid}>
 
-  {/* Charts */}
+<div style={chartCard}>
 
-  <div style={chartGrid}>
+<h3 style={{marginBottom:"20px"}}>
+Application Status
+</h3>
 
-    <div style={chartCard}>
+<PieChart width={350} height={260}>
 
-      <h3 style={{marginBottom:"20px"}}>
-        Application Status
-      </h3>
+<Pie
+data={chartData}
+dataKey="value"
+cx="50%"
+cy="50%"
+outerRadius={90}
+label
+>
 
-      <PieChart width={350} height={260}>
+{chartData.map((entry,index)=>(
+<Cell key={index} fill={COLORS[index]} />
+))}
 
-        <Pie
-          data={chartData}
-          dataKey="value"
-          cx="50%"
-          cy="50%"
-          outerRadius={90}
-          label
-        >
+</Pie>
 
-          {chartData.map((entry,index)=>(
-            <Cell key={index} fill={COLORS[index]} />
-          ))}
+<Tooltip/>
+<Legend/>
 
-        </Pie>
+</PieChart>
 
-        <Tooltip/>
-        <Legend/>
+</div>
 
-      </PieChart>
+<div style={chartCard}>
 
-    </div>
+<h3 style={{marginBottom:"20px"}}>
+Application Trend
+</h3>
 
+<LineChart width={400} height={260} data={trend}>
 
-    <div style={chartCard}>
+<CartesianGrid strokeDasharray="3 3"/>
+<XAxis dataKey="month"/>
+<YAxis/>
+<Tooltip/>
 
-      <h3 style={{marginBottom:"20px"}}>
-        Application Trend
-      </h3>
+<Line
+type="monotone"
+dataKey="applications"
+stroke="#3b82f6"
+strokeWidth={3}
+/>
 
-      <LineChart width={400} height={260} data={trend}>
+</LineChart>
 
-        <CartesianGrid strokeDasharray="3 3"/>
+</div>
 
-        <XAxis dataKey="month"/>
+</div>
 
-        <YAxis/>
+{/* Upcoming Interviews */}
 
-        <Tooltip/>
+<div >
+<UpcomingInterviews/>
+</div>
 
-        <Line
-          type="monotone"
-          dataKey="applications"
-          stroke="#3b82f6"
-          strokeWidth={3}
-        />
+{/* Recent Applications */}
 
-      </LineChart>
+<div style={recentCard}>
 
-    </div>
+<h3 style={{marginBottom:"20px"}}>
+Recent Applications
+</h3>
 
-  </div>
+<table style={{width:"100%",color:"white"}}>
 
+<thead>
+<tr>
+<th align="left">Company</th>
+<th align="left">Role</th>
+<th align="left">Status</th>
+</tr>
+</thead>
 
-  {/* Recent Applications */}
+<tbody>
 
-  <div style={recentCard}>
+{recentApps.length===0?(
+<tr>
+<td colSpan="3">
+No recent applications
+</td>
+</tr>
+):(
+recentApps.map(app=>(
+<tr key={app._id}>
+<td>{app.company}</td>
+<td>{app.role}</td>
+<td>{app.status}</td>
+</tr>
+))
+)}
 
-    <h3 style={{marginBottom:"20px"}}>
-      Recent Applications
-    </h3>
+</tbody>
 
-    <table style={{width:"100%",color:"white"}}>
+</table>
 
-      <thead>
-
-        <tr>
-          <th align="left">Company</th>
-          <th align="left">Role</th>
-          <th align="left">Status</th>
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        {recentApps.length===0?(
-          <tr>
-            <td colSpan="3">
-              No recent applications
-            </td>
-          </tr>
-        ):(
-          recentApps.map(app=>(
-            <tr key={app._id}>
-              <td>{app.company}</td>
-              <td>{app.role}</td>
-              <td>{app.status}</td>
-            </tr>
-          ))
-        )}
-
-      </tbody>
-
-    </table>
-
-  </div>
+</div>
 
 </DashboardLayout>
-
 
 );
 
