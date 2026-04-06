@@ -1,0 +1,64 @@
+/* calendar background */
+.rbc-calendar {
+  background: #0f172a;
+  color: white;
+}
+
+/* header days (Sun Mon Tue...) */
+.rbc-header {
+  background: #0b1b33;
+  color: white;
+  padding: 10px;
+  border-bottom: 1px solid #1e293b;
+  font-weight: 500;
+}
+
+/* grid cells */
+.rbc-day-bg {
+  background: #0f172a;
+}
+
+/* off-range days */
+.rbc-off-range-bg {
+  background: #020617;
+}
+
+/* event style */
+.rbc-event {
+  background: #3b82f6;
+  border-radius: 6px;
+  border: none;
+  padding: 2px 6px;
+  font-size: 13px;
+}
+
+/* toolbar */
+.rbc-toolbar {
+  margin-bottom: 20px;
+}
+
+/* buttons */
+.rbc-btn-group button {
+  background: #1e293b;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+}
+
+.rbc-btn-group button:hover {
+  background: #334155;
+}
+
+/* selected button */
+.rbc-active {
+  background: #3b82f6 !important;
+}
+.rbc-month-view {
+  background: #0b1b33;
+}
+.rbc-date-cell {
+  color: #cbd5f5;
+}
+.rbc-today {
+  background: #1e3a8a !important;
+}

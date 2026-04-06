@@ -7,6 +7,7 @@ import { getRecentApplications } from "../api/applicationApi";
 import UpcomingInterviews from "../components/UpcomingInterviews";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { AppContext } from "../context/AppContext";
+import InterviewCalendar from "../components/InterviewCalendar";
 
 import {
   PieChart,
@@ -237,10 +238,11 @@ strokeWidth={3}
 </div>
 
 </div>
+<InterviewCalendar />
 
 {/* Upcoming Interviews */}
 
-<div >
+<div>
 <UpcomingInterviews/>
 </div>
 
