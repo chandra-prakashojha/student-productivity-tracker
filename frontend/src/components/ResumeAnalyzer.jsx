@@ -70,7 +70,6 @@ const ResumeAnalyzer = () => {
   const score = scoreMatch ? scoreMatch[1] : null;
 
   let scoreColor = "#22c55e";
-
   if (score < 80) scoreColor = "#f59e0b";
   if (score < 60) scoreColor = "#ef4444";
 
@@ -80,7 +79,11 @@ const ResumeAnalyzer = () => {
 
     if (!text) return [];
 
-    const formatted = text.replace(/\*\*(.*?)\*\*/g, "\n\n### $1\n");
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, "\n\n### $1\n")
+      .replace(/(\d+)\.\s*\n\s*/g, "$1. ")
+      .replace(/\n\s*:\s*/g, ": ")
+      .replace(/\n{2,}/g, "\n");
 
     const sections = formatted.split("###");
 
@@ -108,23 +111,127 @@ const ResumeAnalyzer = () => {
 
   const sections = formatSections(cleanedAnalysis);
 
+ const renderPoints = (text) => {
+
+  const rawLines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const merged = [];
+
+  for (let i = 0; i < rawLines.length; i++) {
+
+    const line = rawLines[i];
+
+    if (/^\d+\.$/.test(line) && rawLines[i + 1]) {
+      merged.push(`${line} ${rawLines[i + 1]}`);
+      i++;
+      continue;
+    }
+
+    merged.push(line);
+  }
+
+  return merged.map((line, i) => {
+
+    const match = line.match(/^(\d+)\.\s*(.*)/);
+
+    if (match) {
+
+      const number = match[1];
+      const content = match[2];
+
+      const splitIndex = content.indexOf(":");
+
+      const title = splitIndex !== -1
+        ? content.slice(0, splitIndex)
+        : content;
+
+      const description = splitIndex !== -1
+        ? content.slice(splitIndex + 1)
+        : "";
+
+      return (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            marginBottom: "18px",
+            padding: "12px 14px",
+            background: "rgba(255,255,255,0.03)",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.05)"
+          }}
+        >
+
+          <div
+            style={{
+              minWidth: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              background: "#1e293b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#60a5fa",
+              fontWeight: "600",
+              fontSize: "13px"
+            }}
+          >
+            {number}
+          </div>
+
+          <div>
+
+            <div
+              style={{
+                fontWeight: "600",
+                color: "#ffffff",
+                marginBottom: "4px"
+              }}
+            >
+              {title}
+            </div>
+
+            {description && (
+              <div
+                style={{
+                  color: "#cbd5f5",
+                  fontSize: "14px",
+                  lineHeight: "1.6"
+                }}
+              >
+                {description}
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      );
+
+    }
+
+    return (
+      <p key={i} style={{ color: "#e5e7eb", marginBottom: "10px" }}>
+        {line}
+      </p>
+    );
+
+  });
+
+};
   return (
     <div
       style={{
         padding: "30px",
         maxWidth: "900px",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginTop: "0px",
+        margin: "auto",
         position: "relative",
-
         backgroundImage:
           "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
         backgroundSize: "40px 40px"
       }}
     >
-
-      {/* Glow Background */}
 
       <div
         style={{
@@ -151,8 +258,6 @@ const ResumeAnalyzer = () => {
           zIndex: "-1"
         }}
       />
-
-      {/* Upload Card */}
 
       <div
         style={{
@@ -203,30 +308,47 @@ const ResumeAnalyzer = () => {
 
       </div>
 
-      {/* Loading */}
-
-      {loading && (
+      {score && (
         <div
           style={{
             background: "#111827",
-            padding: "20px",
+            padding: "25px",
             borderRadius: "12px",
-            color: "#9ca3af",
-            marginBottom: "20px"
+            marginBottom: "25px",
+            color: "white"
           }}
         >
-          <p>🔍 Analyzing Resume...</p>
-          <p>⚙️ Extracting Skills</p>
-          <p>🤖 Generating AI Insights</p>
+
+          <h3 style={{ marginBottom: "10px" }}>
+            Resume Score
+          </h3>
+
+          <div
+            style={{
+              width: "100%",
+              background: "#374151",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
+            }}
+          >
+
+            <div
+              style={{
+                width: `${score}%`,
+                background: scoreColor,
+                height: "100%",
+                transition: "width 0.8s ease"
+              }}
+            />
+
+          </div>
+
+          <p style={{ marginTop: "10px", color: "#9ca3af" }}>
+            {score}/100
+          </p>
+
         </div>
-      )}
-
-      {/* Error */}
-
-      {error && (
-        <p style={{ color: "red", marginBottom: "20px" }}>
-          {error}
-        </p>
       )}
 
       {/* Score */}
@@ -292,30 +414,21 @@ const ResumeAnalyzer = () => {
 
           {sections.map((section, index) => (
 
-            <div key={index} style={{ marginBottom: "20px" }}>
+            <div key={index} style={{ marginBottom: "25px" }}>
 
               {section.title && (
-
                 <h3
                   style={{
-                    color: "#22c55e",
-                    marginBottom: "8px"
+                    color: "#60a5fa",
+                    fontWeight: "700",
+                    marginBottom: "12px"
                   }}
                 >
                   {section.title}
                 </h3>
-
               )}
 
-              <div
-                style={{
-                  whiteSpace: "pre-wrap",
-                  lineHeight: "1.7",
-                  color: "#e5e7eb"
-                }}
-              >
-                {section.content}
-              </div>
+              {renderPoints(section.content)}
 
             </div>
 
