@@ -34,13 +34,11 @@ const ResumeAnalyzer = () => {
         }
       );
 
-      console.log("AI RESPONSE:", response.data);
+      let result = response.data.analysis;
 
-      // ensure analysis is always string
-      const result =
-        typeof response.data.analysis === "string"
-          ? response.data.analysis
-          : JSON.stringify(response.data.analysis, null, 2);
+      if (typeof result === "object") {
+        result = result.analysis || JSON.stringify(result);
+      }
 
       setAnalysis(result);
 
@@ -58,50 +56,303 @@ const ResumeAnalyzer = () => {
     }
   };
 
+  const clearResult = () => {
+    setAnalysis("");
+    setFile(null);
+    setError("");
+  };
+
+  const copyAnalysis = () => {
+    navigator.clipboard.writeText(analysis);
+  };
+
+  const scoreMatch = analysis.match(/Resume Score:\s*(\d+)/);
+  const score = scoreMatch ? scoreMatch[1] : null;
+
+  let scoreColor = "#22c55e";
+
+  if (score < 80) scoreColor = "#f59e0b";
+  if (score < 60) scoreColor = "#ef4444";
+
+  const cleanedAnalysis = analysis.replace(/Resume Score:\s*\d+\/?\d*/i, "");
+
+  const formatSections = (text) => {
+
+    if (!text) return [];
+
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, "\n\n### $1\n");
+
+    const sections = formatted.split("###");
+
+    return sections.map((section, index) => {
+
+      if (index === 0) {
+        return {
+          title: "",
+          content: section
+        };
+      }
+
+      const lines = section.split("\n");
+      const title = lines[0];
+      const content = lines.slice(1).join("\n");
+
+      return {
+        title,
+        content
+      };
+
+    });
+
+  };
+
+  const sections = formatSections(cleanedAnalysis);
+
   return (
-    <div style={{ marginTop: "40px", padding: "20px" }}>
+    <div
+      style={{
+        padding: "30px",
+        maxWidth: "900px",
+        marginLeft: "auto",
+        marginRight: "auto",
+        marginTop: "0px",
+        position: "relative",
 
-      <h2>AI Resume Analyzer</h2>
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
+        backgroundSize: "40px 40px"
+      }}
+    >
 
-      <input
-        type="file"
-        accept=".pdf"
-        onChange={(e) => setFile(e.target.files[0])}
+      {/* Glow Background */}
+
+      <div
+        style={{
+          position: "absolute",
+          width: "300px",
+          height: "300px",
+          background: "rgba(34,197,94,0.15)",
+          filter: "blur(120px)",
+          top: "-80px",
+          left: "-80px",
+          zIndex: "-1"
+        }}
       />
 
-      <br /><br />
+      <div
+        style={{
+          position: "absolute",
+          width: "300px",
+          height: "300px",
+          background: "rgba(59,130,246,0.15)",
+          filter: "blur(120px)",
+          bottom: "-80px",
+          right: "-80px",
+          zIndex: "-1"
+        }}
+      />
 
-      <button onClick={uploadResume} disabled={loading}>
-        {loading ? "Analyzing..." : "Analyze Resume"}
-      </button>
+      {/* Upload Card */}
+
+      <div
+        style={{
+          background:
+            "radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%), radial-gradient(circle at bottom right, rgba(59,130,246,0.15), transparent 40%), #0f172a",
+          padding: "30px",
+          borderRadius: "12px",
+          marginBottom: "25px",
+          color: "white",
+          border: "2px dashed #374151",
+          textAlign: "center",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.35)"
+        }}
+      >
+
+        <p style={{ marginBottom: "10px", fontSize: "16px" }}>
+          Upload your resume (PDF)
+        </p>
+
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <br /><br />
+
+        <button
+          onClick={uploadResume}
+          disabled={loading}
+          style={{
+            padding: "10px 18px",
+            borderRadius: "8px",
+            border: "none",
+            background: "#22c55e",
+            color: "white",
+            cursor: "pointer"
+          }}
+        >
+          {loading ? "Analyzing Resume..." : "Analyze Resume"}
+        </button>
+
+        {file && (
+          <p style={{ marginTop: "12px", color: "#9ca3af" }}>
+            Selected File: {file.name}
+          </p>
+        )}
+
+      </div>
+
+      {/* Loading */}
+
+      {loading && (
+        <div
+          style={{
+            background: "#111827",
+            padding: "20px",
+            borderRadius: "12px",
+            color: "#9ca3af",
+            marginBottom: "20px"
+          }}
+        >
+          <p>🔍 Analyzing Resume...</p>
+          <p>⚙️ Extracting Skills</p>
+          <p>🤖 Generating AI Insights</p>
+        </div>
+      )}
+
+      {/* Error */}
 
       {error && (
-        <p style={{ color: "red", marginTop: "15px" }}>
+        <p style={{ color: "red", marginBottom: "20px" }}>
           {error}
         </p>
       )}
 
-      {analysis && (
+      {/* Score */}
+
+      {score && (
         <div
           style={{
-            marginTop: "30px",
-            padding: "20px",
-            background: "#0f172a",
-            borderRadius: "10px",
+            background: "#111827",
+            padding: "25px",
+            borderRadius: "12px",
+            marginBottom: "25px",
             color: "white"
           }}
         >
 
-          <h3>AI Resume Analysis</h3>
+          <h3 style={{ marginBottom: "10px" }}>
+            Resume Score
+          </h3>
 
-          <pre
+          <div
             style={{
-              whiteSpace: "pre-wrap",
-              lineHeight: "1.6"
+              width: "100%",
+              background: "#374151",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
             }}
           >
-            {analysis}
-          </pre>
+
+            <div
+              style={{
+                width: `${score}%`,
+                background: scoreColor,
+                height: "100%",
+                transition: "width 0.8s ease"
+              }}
+            />
+
+          </div>
+
+          <p style={{ marginTop: "10px", color: "#9ca3af" }}>
+            {score}/100
+          </p>
+
+        </div>
+      )}
+
+      {/* Analysis */}
+
+      {analysis && (
+        <div
+          style={{
+            background: "#0f172a",
+            padding: "25px",
+            borderRadius: "12px",
+            color: "white"
+          }}
+        >
+
+          <h3 style={{ marginBottom: "20px" }}>
+            Resume Analysis
+          </h3>
+
+          {sections.map((section, index) => (
+
+            <div key={index} style={{ marginBottom: "20px" }}>
+
+              {section.title && (
+
+                <h3
+                  style={{
+                    color: "#22c55e",
+                    marginBottom: "8px"
+                  }}
+                >
+                  {section.title}
+                </h3>
+
+              )}
+
+              <div
+                style={{
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.7",
+                  color: "#e5e7eb"
+                }}
+              >
+                {section.content}
+              </div>
+
+            </div>
+
+          ))}
+
+          <div style={{ marginTop: "20px" }}>
+
+            <button
+              onClick={copyAnalysis}
+              style={{
+                marginRight: "10px",
+                padding: "8px 14px",
+                background: "#374151",
+                border: "none",
+                borderRadius: "6px",
+                color: "white",
+                cursor: "pointer"
+              }}
+            >
+              Copy Analysis
+            </button>
+
+            <button
+              onClick={clearResult}
+              style={{
+                padding: "8px 14px",
+                background: "#ef4444",
+                border: "none",
+                borderRadius: "6px",
+                color: "white",
+                cursor: "pointer"
+              }}
+            >
+              Clear Result
+            </button>
+
+          </div>
 
         </div>
       )}
