@@ -34,13 +34,11 @@ const ResumeAnalyzer = () => {
         }
       );
 
-      console.log("AI RESPONSE:", response.data);
+      let result = response.data.analysis;
 
-      // ensure analysis is always string
-      const result =
-        typeof response.data.analysis === "string"
-          ? response.data.analysis
-          : JSON.stringify(response.data.analysis, null, 2);
+      if (typeof result === "object") {
+        result = result.analysis || JSON.stringify(result);
+      }
 
       setAnalysis(result);
 
@@ -58,50 +56,369 @@ const ResumeAnalyzer = () => {
     }
   };
 
+  const clearResult = () => {
+    setAnalysis("");
+    setFile(null);
+    setError("");
+  };
+
+  const copyAnalysis = () => {
+    navigator.clipboard.writeText(analysis);
+  };
+
+  const scoreMatch = analysis.match(/Resume Score:\s*(\d+)/);
+  const score = scoreMatch ? scoreMatch[1] : null;
+
+  let scoreColor = "#22c55e";
+  if (score < 80) scoreColor = "#f59e0b";
+  if (score < 60) scoreColor = "#ef4444";
+
+  const cleanedAnalysis = analysis.replace(/Resume Score:\s*\d+\/?\d*/i, "");
+
+  const formatSections = (text) => {
+
+    if (!text) return [];
+
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, "\n\n### $1\n")
+      .replace(/(\d+)\.\s*\n\s*/g, "$1. ")
+      .replace(/\n\s*:\s*/g, ": ")
+      .replace(/\n{2,}/g, "\n");
+
+    const sections = formatted.split("###");
+
+    return sections.map((section, index) => {
+
+      if (index === 0) {
+        return {
+          title: "",
+          content: section
+        };
+      }
+
+      const lines = section.split("\n");
+      const title = lines[0];
+      const content = lines.slice(1).join("\n");
+
+      return {
+        title,
+        content
+      };
+
+    });
+
+  };
+
+  const sections = formatSections(cleanedAnalysis);
+
+ const renderPoints = (text) => {
+
+  const rawLines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const merged = [];
+
+  for (let i = 0; i < rawLines.length; i++) {
+
+    const line = rawLines[i];
+
+    if (/^\d+\.$/.test(line) && rawLines[i + 1]) {
+      merged.push(`${line} ${rawLines[i + 1]}`);
+      i++;
+      continue;
+    }
+
+    merged.push(line);
+  }
+
+  return merged.map((line, i) => {
+
+    const match = line.match(/^(\d+)\.\s*(.*)/);
+
+    if (match) {
+
+      const number = match[1];
+      const content = match[2];
+
+      const splitIndex = content.indexOf(":");
+
+      const title = splitIndex !== -1
+        ? content.slice(0, splitIndex)
+        : content;
+
+      const description = splitIndex !== -1
+        ? content.slice(splitIndex + 1)
+        : "";
+
+      return (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            marginBottom: "18px",
+            padding: "12px 14px",
+            background: "rgba(255,255,255,0.03)",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.05)"
+          }}
+        >
+
+          <div
+            style={{
+              minWidth: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              background: "#1e293b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#60a5fa",
+              fontWeight: "600",
+              fontSize: "13px"
+            }}
+          >
+            {number}
+          </div>
+
+          <div>
+
+            <div
+              style={{
+                fontWeight: "600",
+                color: "#ffffff",
+                marginBottom: "4px"
+              }}
+            >
+              {title}
+            </div>
+
+            {description && (
+              <div
+                style={{
+                  color: "#cbd5f5",
+                  fontSize: "14px",
+                  lineHeight: "1.6"
+                }}
+              >
+                {description}
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      );
+
+    }
+
+    return (
+      <p key={i} style={{ color: "#e5e7eb", marginBottom: "10px" }}>
+        {line}
+      </p>
+    );
+
+  });
+
+};
   return (
-    <div style={{ marginTop: "40px", padding: "20px" }}>
+    <div
+      style={{
+        padding: "30px",
+        maxWidth: "900px",
+        margin: "auto",
+        position: "relative",
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
+        backgroundSize: "40px 40px"
+      }}
+    >
 
-      <h2>AI Resume Analyzer</h2>
-
-      <input
-        type="file"
-        accept=".pdf"
-        onChange={(e) => setFile(e.target.files[0])}
+      <div
+        style={{
+          position: "absolute",
+          width: "300px",
+          height: "300px",
+          background: "rgba(34,197,94,0.15)",
+          filter: "blur(120px)",
+          top: "-80px",
+          left: "-80px",
+          zIndex: "-1"
+        }}
       />
 
-      <br /><br />
+      <div
+        style={{
+          position: "absolute",
+          width: "300px",
+          height: "300px",
+          background: "rgba(59,130,246,0.15)",
+          filter: "blur(120px)",
+          bottom: "-80px",
+          right: "-80px",
+          zIndex: "-1"
+        }}
+      />
 
-      <button onClick={uploadResume} disabled={loading}>
-        {loading ? "Analyzing..." : "Analyze Resume"}
-      </button>
+      <div
+        style={{
+          background:
+            "radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%), radial-gradient(circle at bottom right, rgba(59,130,246,0.15), transparent 40%), #0f172a",
+          padding: "30px",
+          borderRadius: "12px",
+          marginBottom: "25px",
+          color: "white",
+          border: "2px dashed #374151",
+          textAlign: "center",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.35)"
+        }}
+      >
 
-      {error && (
-        <p style={{ color: "red", marginTop: "15px" }}>
-          {error}
+        <p style={{ marginBottom: "10px", fontSize: "16px" }}>
+          Upload your resume (PDF)
         </p>
+
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <br /><br />
+
+        <button
+          onClick={uploadResume}
+          disabled={loading}
+          style={{
+            padding: "10px 18px",
+            borderRadius: "8px",
+            border: "none",
+            background: "#22c55e",
+            color: "white",
+            cursor: "pointer"
+          }}
+        >
+          {loading ? "Analyzing Resume..." : "Analyze Resume"}
+        </button>
+
+        {file && (
+          <p style={{ marginTop: "12px", color: "#9ca3af" }}>
+            Selected File: {file.name}
+          </p>
+        )}
+
+      </div>
+
+      {score && (
+        <div
+          style={{
+            background: "#111827",
+            padding: "25px",
+            borderRadius: "12px",
+            marginBottom: "25px",
+            color: "white"
+          }}
+        >
+
+          <h3 style={{ marginBottom: "10px" }}>
+            Resume Score
+          </h3>
+
+          <div
+            style={{
+              width: "100%",
+              background: "#374151",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
+            }}
+          >
+
+            <div
+              style={{
+                width: `${score}%`,
+                background: scoreColor,
+                height: "100%",
+                transition: "width 0.8s ease"
+              }}
+            />
+
+          </div>
+
+          <p style={{ marginTop: "10px", color: "#9ca3af" }}>
+            {score}/100
+          </p>
+
+        </div>
       )}
 
       {analysis && (
         <div
           style={{
-            marginTop: "30px",
-            padding: "20px",
             background: "#0f172a",
-            borderRadius: "10px",
+            padding: "25px",
+            borderRadius: "12px",
             color: "white"
           }}
         >
 
-          <h3>AI Resume Analysis</h3>
+          <h3 style={{ marginBottom: "20px" }}>
+            Resume Analysis
+          </h3>
 
-          <pre
-            style={{
-              whiteSpace: "pre-wrap",
-              lineHeight: "1.6"
-            }}
-          >
-            {analysis}
-          </pre>
+          {sections.map((section, index) => (
+
+            <div key={index} style={{ marginBottom: "25px" }}>
+
+              {section.title && (
+                <h3
+                  style={{
+                    color: "#60a5fa",
+                    fontWeight: "700",
+                    marginBottom: "12px"
+                  }}
+                >
+                  {section.title}
+                </h3>
+              )}
+
+              {renderPoints(section.content)}
+
+            </div>
+
+          ))}
+
+          <div style={{ marginTop: "20px" }}>
+
+            <button
+              onClick={copyAnalysis}
+              style={{
+                marginRight: "10px",
+                padding: "8px 14px",
+                background: "#374151",
+                border: "none",
+                borderRadius: "6px",
+                color: "white",
+                cursor: "pointer"
+              }}
+            >
+              Copy Analysis
+            </button>
+
+            <button
+              onClick={clearResult}
+              style={{
+                padding: "8px 14px",
+                background: "#ef4444",
+                border: "none",
+                borderRadius: "6px",
+                color: "white",
+                cursor: "pointer"
+              }}
+            >
+              Clear Result
+            </button>
+
+          </div>
 
         </div>
       )}
