@@ -7,14 +7,13 @@ const helmet = require("helmet");
 
 const connectDB = require("./config/db");
 
-// ROUTES
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const companyRoutes = require("./routes/companyRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
 
-// MIDDLEWARE
 const errorHandler = require("./middleware/errorHandler");
 const rateLimiter = require("./middleware/rateLimiter");
 
@@ -70,6 +69,8 @@ app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/companies", companyRoutes);
 
+app.use("/api/resume", resumeRoutes);
+
 
 
 /*
@@ -77,8 +78,9 @@ app.use("/api/companies", companyRoutes);
 HEALTH CHECK
 ====================================
 */
+
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     status: "OK",
     message: "Placement Tracker API running",
     time: new Date()
@@ -89,9 +91,10 @@ app.get("/", (req, res) => {
 
 /*
 ====================================
-ERROR HANDLER
+ERROR HANDLER (ALWAYS LAST)
 ====================================
 */
+
 app.use(errorHandler);
 
 

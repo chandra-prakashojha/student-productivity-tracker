@@ -1,55 +1,34 @@
 const express = require("express");
-const router = express.Router();
-
-/* CONTROLLERS */
 
 const {
   getApplications,
   createApplication,
   updateApplication,
   deleteApplication,
-  getRecentApplications
+  getRecentApplications,
+  getApplicationById,
+  addInterviewRound,
+  getCompanyAnalytics
 } = require("../controllers/applicationController");
 
+const { protect } = require("../middleware/authMiddleware");
 
-/*
-=====================================
-GET RECENT APPLICATIONS (Dashboard)
-=====================================
-*/
-router.get("/recent", getRecentApplications);
+const router = express.Router();
 
+router.get("/", protect, getApplications);
 
-/*
-=====================================
-GET ALL APPLICATIONS
-=====================================
-*/
-router.get("/", getApplications);
+router.post("/", protect, createApplication);
 
+router.put("/:id", protect, updateApplication);
 
-/*
-=====================================
-CREATE APPLICATION
-=====================================
-*/
-router.post("/", createApplication);
+router.delete("/:id", protect, deleteApplication);
 
+router.get("/recent", protect, getRecentApplications);
 
-/*
-=====================================
-UPDATE APPLICATION
-=====================================
-*/
-router.put("/:id", updateApplication);
+router.get("/:id", protect, getApplicationById);
 
+router.post("/:id/interview-round", protect, addInterviewRound);
 
-/*
-=====================================
-DELETE APPLICATION
-=====================================
-*/
-router.delete("/:id", deleteApplication);
-
+router.get("/analytics/company", protect, getCompanyAnalytics);
 
 module.exports = router;

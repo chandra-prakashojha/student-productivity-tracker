@@ -1,0 +1,13 @@
+{
+  "name": "placement-tracker-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "moment": "^2.30.1",
+    "react-big-calendar": "^1.19.4"
+  }
+}

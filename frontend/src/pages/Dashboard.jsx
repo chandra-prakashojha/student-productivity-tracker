@@ -6,8 +6,10 @@ import {
 import { getRecentApplications } from "../api/applicationApi";
 import UpcomingInterviews from "../components/UpcomingInterviews";
 import DashboardLayout from "../layouts/DashboardLayout";
+import ResumeAnalyzer from "../components/ResumeAnalyzer";
 import { AppContext } from "../context/AppContext";
 import InterviewCalendar from "../components/InterviewCalendar";
+
 
 import {
   PieChart,
@@ -33,6 +35,7 @@ interviews:0,
 offers:0,
 rejected:0
 });
+
 
 const [recentApps,setRecentApps] = useState([]);
 const [trend,setTrend] = useState([]);
@@ -113,6 +116,7 @@ const COLORS=[
 "#ef4444"
 ];
 
+
 /* LOADING */
 
 if(loading){
@@ -120,6 +124,7 @@ if(loading){
 return(
 
 <DashboardLayout>
+
 
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
@@ -147,6 +152,10 @@ return(
 <DashboardLayout>
 
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
+<div style={{marginBottom:"40px"}}>
+      <h2>Resume Analyzer</h2>
+      <ResumeAnalyzer />
+    </div>
 
 {/* Stats Cards */}
 

@@ -51,6 +51,27 @@ const applicationSchema = new mongoose.Schema(
         default: Date.now
       }
     }
+  ],
+
+  /* INTERVIEW ROUNDS */
+
+  interviewRounds: [
+    {
+      roundName: {
+        type: String
+      },
+      date: {
+        type: Date
+      },
+      status: {
+        type: String,
+        enum: ["Scheduled", "Cleared", "Rejected", "Pending"],
+        default: "Pending"
+      },
+      notes: {
+        type: String
+      }
+    }
   ]
 
 },
@@ -59,27 +80,21 @@ const applicationSchema = new mongoose.Schema(
 }
 );
 
-
 /* COMPOUND INDEX */
-applicationSchema.index({ userId: 1, status: 1 });
 
+applicationSchema.index({ userId: 1, status: 1 });
 
 /* AUTO ADD FIRST HISTORY ENTRY */
 
-applicationSchema.pre("save", function(next){
+applicationSchema.pre("save", function () {
 
-  if(this.isNew){
-
+  if (this.isNew) {
     this.history.push({
       status: this.status,
       date: new Date()
     });
-
   }
 
-  next();
-
 });
-
 
 module.exports = mongoose.model("Application", applicationSchema);

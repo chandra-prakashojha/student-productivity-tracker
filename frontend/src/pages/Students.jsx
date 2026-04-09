@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
+import ResumeAnalyzer from "../components/ResumeAnalyzer";
 import DashboardLayout from "../layouts/DashboardLayout";
-
 const Students = () => {
 
   const [students,setStudents] = useState([]);
@@ -32,6 +32,7 @@ const Students = () => {
     }
 
   };
+  <ResumeAnalyzer />
 
   useEffect(()=>{
     fetchStudents();
