@@ -120,12 +120,20 @@ const ResumeAnalyzer = () => {
 
     const line = rawLines[i];
 
-    if (/^\d+\.$/.test(line) && rawLines[i + 1]) {
-      merged.push(`${line} ${rawLines[i + 1]}`);
-      i++;
-      continue;
-    }
+  if (/^\d+\.\s*$/.test(line) && rawLines[i + 1]) {
 
+  let combined = `${line.trim()} ${rawLines[i + 1].trim()}`;
+
+  if (rawLines[i + 2] && !/^\d+\./.test(rawLines[i + 2])) {
+    combined += ` ${rawLines[i + 2].trim()}`;
+    i += 2;
+  } else {
+    i++;
+  }
+
+  merged.push(combined);
+  continue;
+}
     merged.push(line);
   }
 
@@ -138,75 +146,20 @@ const ResumeAnalyzer = () => {
       const number = match[1];
       const content = match[2];
 
-      const splitIndex = content.indexOf(":");
-
-      const title = splitIndex !== -1
-        ? content.slice(0, splitIndex)
-        : content;
-
-      const description = splitIndex !== -1
-        ? content.slice(splitIndex + 1)
-        : "";
-
       return (
-        <div
+        <p
           key={i}
           style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px",
-            marginBottom: "18px",
-            padding: "12px 14px",
-            background: "rgba(255,255,255,0.03)",
-            borderRadius: "8px",
-            border: "1px solid rgba(255,255,255,0.05)"
+            color: "#e5e7eb",
+            marginBottom: "14px",
+            lineHeight: "1.6"
           }}
         >
-
-          <div
-            style={{
-              minWidth: "28px",
-              height: "28px",
-              borderRadius: "6px",
-              background: "#1e293b",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#60a5fa",
-              fontWeight: "600",
-              fontSize: "13px"
-            }}
-          >
-            {number}
-          </div>
-
-          <div>
-
-            <div
-              style={{
-                fontWeight: "600",
-                color: "#ffffff",
-                marginBottom: "4px"
-              }}
-            >
-              {title}
-            </div>
-
-            {description && (
-              <div
-                style={{
-                  color: "#cbd5f5",
-                  fontSize: "14px",
-                  lineHeight: "1.6"
-                }}
-              >
-                {description}
-              </div>
-            )}
-
-          </div>
-
-        </div>
+          <span style={{ color: "#60a5fa", fontWeight: "600" }}>
+            {number}.
+          </span>{" "}
+          {content}
+        </p>
       );
 
     }
@@ -220,6 +173,7 @@ const ResumeAnalyzer = () => {
   });
 
 };
+
   return (
     <div
       style={{
@@ -351,51 +305,6 @@ const ResumeAnalyzer = () => {
         </div>
       )}
 
-      {/* Score */}
-
-      {score && (
-        <div
-          style={{
-            background: "#111827",
-            padding: "25px",
-            borderRadius: "12px",
-            marginBottom: "25px",
-            color: "white"
-          }}
-        >
-
-          <h3 style={{ marginBottom: "10px" }}>
-            Resume Score
-          </h3>
-
-          <div
-            style={{
-              width: "100%",
-              background: "#374151",
-              height: "10px",
-              borderRadius: "10px",
-              overflow: "hidden"
-            }}
-          >
-
-            <div
-              style={{
-                width: `${score}%`,
-                background: scoreColor,
-                height: "100%",
-                transition: "width 0.8s ease"
-              }}
-            />
-
-          </div>
-
-          <p style={{ marginTop: "10px", color: "#9ca3af" }}>
-            {score}/100
-          </p>
-
-        </div>
-      )}
-
       {/* Analysis */}
 
       {analysis && (
@@ -419,7 +328,7 @@ const ResumeAnalyzer = () => {
               {section.title && (
                 <h3
                   style={{
-                    color: "#60a5fa",
+                    color: "#e5e7eb",
                     fontWeight: "700",
                     marginBottom: "12px"
                   }}
