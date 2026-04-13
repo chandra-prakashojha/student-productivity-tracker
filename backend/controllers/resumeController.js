@@ -12,6 +12,7 @@ exports.analyzeResume = async (req, res) => {
     }
 
     const filePath = req.file.path;
+    const role = req.body.role || "Software Developer";
 
     // read uploaded file
     const buffer = fs.readFileSync(filePath);
@@ -22,7 +23,7 @@ exports.analyzeResume = async (req, res) => {
     const resumeText = data.text;
 
     // send text to AI service
-    const aiResult = await analyzeResumeAI(resumeText);
+   const aiResult = await analyzeResumeAI(resumeText, role);
 
     // delete file after processing
     fs.unlinkSync(filePath);

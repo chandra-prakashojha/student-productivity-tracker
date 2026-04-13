@@ -4,19 +4,38 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
-exports.analyzeResumeAI = async (resumeText) => {
+exports.analyzeResumeAI = async (resumeText, role) => {
 
-  const prompt = `
-You are an AI career advisor.
+ const prompt = `
+You are an expert ATS resume evaluator.
 
-Analyze the resume and provide:
+Analyze the following resume for the role of ${role}.
 
-1. Resume score out of 100
-2. Strengths
-3. Weaknesses
-4. Improvements required
-5. Suggested job roles
-6. 3 interview questions based on the resume
+Return the analysis in the following format:
+
+Resume Score: <score out of 100>
+
+ATS Score: <score out of 100>
+
+Strengths:
+1. <strength>
+2. <strength>
+
+Weaknesses:
+1. <weakness>
+2. <weakness>
+
+Improvements Required:
+1. <suggestion>
+2. <suggestion>
+
+Suggested Job Roles:
+1. <role>
+2. <role>
+
+Interview Questions:
+1. <question>
+2. <question>
 
 Resume:
 ${resumeText}

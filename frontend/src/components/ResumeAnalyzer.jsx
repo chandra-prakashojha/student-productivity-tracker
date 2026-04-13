@@ -7,6 +7,7 @@ const ResumeAnalyzer = () => {
   const [analysis, setAnalysis] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [role, setRole] = useState("");
 
   const uploadResume = async () => {
 
@@ -23,6 +24,7 @@ const ResumeAnalyzer = () => {
 
       const formData = new FormData();
       formData.append("resume", file);
+      formData.append("role", role);
 
       const response = await axios.post(
         "/resume/analyze",
@@ -69,11 +71,17 @@ const ResumeAnalyzer = () => {
   const scoreMatch = analysis.match(/Resume Score:\s*(\d+)/);
   const score = scoreMatch ? scoreMatch[1] : null;
 
+  const atsMatch = analysis.match(/ATS Score:\s*(\d+)/);
+const atsScore = atsMatch ? atsMatch[1] : null;
+
   let scoreColor = "#22c55e";
   if (score < 80) scoreColor = "#f59e0b";
   if (score < 60) scoreColor = "#ef4444";
 
   const cleanedAnalysis = analysis.replace(/Resume Score:\s*\d+\/?\d*/i, "");
+
+
+ 
 
   const formatSections = (text) => {
 
@@ -120,14 +128,12 @@ const ResumeAnalyzer = () => {
 
     const line = rawLines[i];
 
-  if (/^\d+\.\s*$/.test(line) && rawLines[i + 1]) {
+  if (/^\d+\.\s*$/.test(line)) {
 
-  let combined = `${line.trim()} ${rawLines[i + 1].trim()}`;
+  let combined = line.trim();
 
-  if (rawLines[i + 2] && !/^\d+\./.test(rawLines[i + 2])) {
-    combined += ` ${rawLines[i + 2].trim()}`;
-    i += 2;
-  } else {
+  while (rawLines[i + 1] && !/^\d+\./.test(rawLines[i + 1])) {
+    combined += " " + rawLines[i + 1].trim();
     i++;
   }
 
@@ -231,6 +237,29 @@ const ResumeAnalyzer = () => {
           Upload your resume (PDF)
         </p>
 
+<div style={{ marginBottom: "15px" }}>
+  <select
+    value={role}
+    onChange={(e) => setRole(e.target.value)}
+    style={{
+      padding: "8px",
+      borderRadius: "6px",
+      background: "#1e293b",
+      color: "white",
+      border: "1px solid #374151"
+    }}
+  >
+    <option value="">Select Target Role</option>
+    <option value="Frontend Developer">Frontend Developer</option>
+    <option value="Backend Developer">Backend Developer</option>
+    <option value="Full Stack Developer">Full Stack Developer</option>
+    <option value="Data Scientist">Data Scientist</option>
+    <option value="Cyber Security Analyst">Cyber Security Analyst</option>
+  </select>
+</div>
+
+
+
         <input
           type="file"
           accept=".pdf"
@@ -304,6 +333,53 @@ const ResumeAnalyzer = () => {
 
         </div>
       )}
+
+ {atsScore && (
+  <div
+    style={{
+      background: "#111827",
+      padding: "25px",
+      borderRadius: "12px",
+      marginBottom: "25px",
+      color: "white"
+    }}
+  >
+
+    <h3 style={{ marginBottom: "10px" }}>
+      ATS Compatibility Score
+    </h3>
+
+    <div
+      style={{
+        width: "100%",
+        background: "#374151",
+        height: "10px",
+        borderRadius: "10px",
+        overflow: "hidden"
+      }}
+    >
+
+      <div
+        style={{
+          width: `${atsScore}%`,
+          background: "#3b82f6",
+          height: "100%",
+          transition: "width 0.8s ease"
+        }}
+      />
+
+    </div>
+
+    <p style={{ marginTop: "10px", color: "#9ca3af" }}>
+      {atsScore}/100
+    </p>
+
+  </div>
+)}
+
+
+
+
 
       {/* Analysis */}
 
