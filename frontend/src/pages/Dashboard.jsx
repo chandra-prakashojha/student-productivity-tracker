@@ -9,7 +9,9 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import ResumeAnalyzer from "../components/ResumeAnalyzer";
 import { AppContext } from "../context/AppContext";
 import InterviewCalendar from "../components/InterviewCalendar";
-
+import { motion } from "framer-motion";
+import CountUp from "react-countup";
+import { Users, Briefcase, Calendar, Trophy, TrendingUp } from "lucide-react";
 
 import {
   PieChart,
@@ -35,7 +37,6 @@ interviews:0,
 offers:0,
 rejected:0
 });
-
 
 const [recentApps,setRecentApps] = useState([]);
 const [trend,setTrend] = useState([]);
@@ -95,8 +96,6 @@ loadDashboard();
 
 },[refreshDashboard]);
 
-/* SUCCESS RATE CALCULATION */
-
 const successRate =
 stats.applications === 0
 ? 0
@@ -116,15 +115,11 @@ const COLORS=[
 "#ef4444"
 ];
 
-
-/* LOADING */
-
 if(loading){
 
 return(
 
 <DashboardLayout>
-
 
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
@@ -152,39 +147,90 @@ return(
 <DashboardLayout>
 
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
+
 <div style={{marginBottom:"40px"}}>
-      <h2>Resume Analyzer</h2>
-      <ResumeAnalyzer />
-    </div>
+<h2>Resume Analyzer</h2>
+<ResumeAnalyzer />
+</div>
 
 {/* Stats Cards */}
 
 <div style={statsGrid}>
 
-<div style={card}>
-<h3>Total Students</h3>
-<p>{stats.students}</p>
-</div>
+<motion.div
+initial={{ opacity:0, y:30 }}
+animate={{ opacity:1, y:0 }}
+transition={{ duration:0.5 }}
+whileHover={{
+scale:1.05,
+y:-6,
+boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
+}}
+style={card}
+>
+<h3 style={cardTitle}><Users size={18}/> Total Students</h3>
+<p><CountUp end={stats.students} duration={1.2}/></p>
+</motion.div>
 
-<div style={card}>
-<h3>Total Applications</h3>
-<p>{stats.applications}</p>
-</div>
+<motion.div
+initial={{ opacity:0, y:30 }}
+animate={{ opacity:1, y:0 }}
+transition={{ duration:0.6 }}
+whileHover={{
+scale:1.05,
+y:-6,
+boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
+}}
+style={card}
+>
+<h3 style={cardTitle}><Briefcase size={18}/> Total Applications</h3>
+<p><CountUp end={stats.applications} duration={1.2}/></p>
+</motion.div>
 
-<div style={card}>
-<h3>Interviews</h3>
-<p>{stats.interviews}</p>
-</div>
+<motion.div
+initial={{ opacity:0, y:30 }}
+animate={{ opacity:1, y:0 }}
+transition={{ duration:0.7 }}
+whileHover={{
+scale:1.05,
+y:-6,
+boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
+}}
+style={card}
+>
+<h3 style={cardTitle}><Calendar size={18}/> Interviews</h3>
+<p><CountUp end={stats.interviews} duration={1.2}/></p>
+</motion.div>
 
-<div style={card}>
-<h3>Offers</h3>
-<p>{stats.offers}</p>
-</div>
+<motion.div
+initial={{ opacity:0, y:30 }}
+animate={{ opacity:1, y:0 }}
+transition={{ duration:0.8 }}
+whileHover={{
+scale:1.05,
+y:-6,
+boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
+}}
+style={card}
+>
+<h3 style={cardTitle}><Trophy size={18}/> Offers</h3>
+<p><CountUp end={stats.offers} duration={1.2}/></p>
+</motion.div>
 
-<div style={card}>
-<h3>Offer Rate</h3>
-<p>{successRate}%</p>
-</div>
+<motion.div
+initial={{ opacity:0, y:30 }}
+animate={{ opacity:1, y:0 }}
+transition={{ duration:0.9 }}
+whileHover={{
+scale:1.05,
+y:-6,
+boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
+}}
+style={card}
+>
+<h3 style={cardTitle}><TrendingUp size={18}/> Offer Rate</h3>
+<p><CountUp end={successRate} duration={1.2}/> %</p>
+</motion.div>
 
 </div>
 
@@ -247,15 +293,12 @@ strokeWidth={3}
 </div>
 
 </div>
-<InterviewCalendar />
 
-{/* Upcoming Interviews */}
+<InterviewCalendar />
 
 <div>
 <UpcomingInterviews/>
 </div>
-
-{/* Recent Applications */}
 
 <div style={recentCard}>
 
@@ -303,8 +346,6 @@ recentApps.map(app=>(
 
 };
 
-/* STYLES */
-
 const statsGrid={
 display:"grid",
 gridTemplateColumns:"repeat(5,1fr)",
@@ -324,6 +365,13 @@ background:"#0f172a",
 padding:"25px",
 borderRadius:"10px",
 textAlign:"center"
+};
+
+const cardTitle={
+display:"flex",
+alignItems:"center",
+justifyContent:"center",
+gap:"8px"
 };
 
 const chartCard={
