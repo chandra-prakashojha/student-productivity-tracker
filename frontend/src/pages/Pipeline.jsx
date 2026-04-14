@@ -11,7 +11,12 @@ const Pipeline = () => {
 
   const statuses = ["Applied","Interview","Offer","Rejected"];
 
-  /* FETCH APPLICATIONS */
+  const statusColors = {
+    Applied:"#3b82f6",
+    Interview:"#f59e0b",
+    Offer:"#10b981",
+    Rejected:"#ef4444"
+  };
 
   const fetchApplications = async () => {
 
@@ -35,8 +40,6 @@ const Pipeline = () => {
     }
 
   };
-
-  /* FETCH COMPANIES */
 
   const fetchCompanies = async () => {
 
@@ -67,38 +70,34 @@ const Pipeline = () => {
   },[]);
 
 
-  /* DRAG END */
-
   const onDragEnd = async (result) => {
 
-  const { destination, draggableId } = result;
+    const { destination, draggableId } = result;
 
-  if (!destination) return;
+    if (!destination) return;
 
-  const newStatus = destination.droppableId;
+    const newStatus = destination.droppableId;
 
-  try {
+    try {
 
-    const movedApp = applications.find(a => a._id === draggableId);
+      const movedApp = applications.find(a => a._id === draggableId);
 
-    await updateApplication(draggableId, {
-      companyId: movedApp.companyId?._id || movedApp.companyId,
-      role: movedApp.role,
-      status: newStatus
-    });
+      await updateApplication(draggableId, {
+        companyId: movedApp.companyId?._id || movedApp.companyId,
+        role: movedApp.role,
+        status: newStatus
+      });
 
-    fetchApplications();
+      fetchApplications();
 
-  } catch (err) {
+    } catch (err) {
 
-    console.log(err);
+      console.log(err);
 
-  }
+    }
 
-};
+  };
 
-
-  /* GET COMPANY NAME SAFELY */
 
   const getCompanyName = (app) => {
 
@@ -111,8 +110,6 @@ const Pipeline = () => {
   };
 
 
-  /* GET TIMELINE STRING */
-
   const getTimeline = (app) => {
 
     if(!app.history || app.history.length === 0) return null;
@@ -123,6 +120,18 @@ const Pipeline = () => {
         {i !== app.history.length-1 && " → "}
       </span>
     ));
+
+  };
+
+
+  const formatDate = (date) => {
+
+    if(!date) return null;
+
+    return new Date(date).toLocaleDateString("en-US",{
+      month:"short",
+      day:"numeric"
+    });
 
   };
 
@@ -148,22 +157,33 @@ const Pipeline = () => {
 
                 <Droppable droppableId={status} key={status}>
 
-                  {(provided)=>(
+                  {(provided,snapshot)=>(
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      style={columnStyle}
+                      style={{
+                        ...columnStyle,
+                        borderTop:`3px solid ${statusColors[status]}`,
+                        background:snapshot.isDraggingOver ? "#1f2937" : "#111827"
+                      }}
+
+                      onMouseEnter={(e)=>{
+                        e.currentTarget.style.transform="translateY(-8px)";
+                        e.currentTarget.style.boxShadow="0 18px 40px rgba(0,0,0,0.6)";
+                      }}
+
+                      onMouseLeave={(e)=>{
+                        e.currentTarget.style.transform="translateY(0px)";
+                        e.currentTarget.style.boxShadow="0 6px 16px rgba(0,0,0,0.4)";
+                      }}
                     >
 
-                      {/* COLUMN HEADER */}
                       <h3 style={columnHeader}>
                         {status}
                         <span style={countBadge}>
                           {columnApps.length}
                         </span>
                       </h3>
-
-                      {/* APPLICATION CARDS */}
 
                       {columnApps.map((app,index)=>(
 
@@ -173,26 +193,58 @@ const Pipeline = () => {
                           index={index}
                         >
 
-                          {(provided)=>(
+                          {(provided,snapshot)=>(
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               style={{
                                 ...cardStyle,
+                                boxShadow:snapshot.isDragging
+                                  ? "0 12px 28px rgba(0,0,0,0.7)"
+                                  : "0 0 0 rgba(59,130,246,0)",
                                 ...provided.draggableProps.style
                               }}
+
+                              onMouseEnter={(e)=>{
+                                e.currentTarget.style.boxShadow =
+                                  "0 0 18px rgba(59,130,246,0.35)";
+                              }}
+
+                              onMouseLeave={(e)=>{
+                                e.currentTarget.style.boxShadow =
+                                  "0 2px 6px rgba(0,0,0,0.4)";
+                              }}
+
                             >
 
-                              <strong>
-                                {getCompanyName(app)}
-                              </strong>
+                              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
 
-                              <p style={roleStyle}>
+                                <span
+                                  style={{
+                                    width:"8px",
+                                    height:"8px",
+                                    borderRadius:"50%",
+                                    background:statusColors[app.status]
+                                  }}
+                                />
+
+                                <strong>
+                                  {getCompanyName(app)}
+                                </strong>
+
+                              </div>
+
+                              <div style={roleBadge}>
                                 {app.role}
-                              </p>
+                              </div>
 
-                              {/* TIMELINE */}
+                              {app.createdAt && (
+                                <div style={dateStyle}>
+                                  Applied: {formatDate(app.createdAt)}
+                                </div>
+                              )}
+
                               {app.history && (
                                 <div style={timelineStyle}>
                                   {getTimeline(app)}
@@ -230,7 +282,6 @@ const Pipeline = () => {
 };
 
 
-/* STYLES */
 
 const boardStyle={
   display:"grid",
@@ -242,7 +293,10 @@ const columnStyle={
   background:"#111827",
   padding:"15px",
   borderRadius:"10px",
-  minHeight:"450px"
+  minHeight:"380px",
+  transition:"all 0.25s ease",
+  transform:"translateY(0px)",
+  boxShadow:"0 6px 16px rgba(0,0,0,0.4)"
 };
 
 const columnHeader={
@@ -261,17 +315,27 @@ const countBadge={
 
 const cardStyle={
   background:"#0f172a",
-  padding:"12px",
-  borderRadius:"8px",
-  marginBottom:"10px",
+  padding:"14px",
+  borderRadius:"10px",
+  marginBottom:"12px",
   border:"1px solid #1e293b",
-  cursor:"grab"
+  cursor:"grab",
+  transition:"all 0.25s ease"
 };
 
-const roleStyle={
-  fontSize:"13px",
-  marginTop:"4px",
-  color:"#cbd5f5"
+const roleBadge={
+  background:"#1e293b",
+  padding:"3px 8px",
+  borderRadius:"6px",
+  fontSize:"11px",
+  display:"inline-block",
+  marginTop:"6px"
+};
+
+const dateStyle={
+  fontSize:"11px",
+  marginTop:"6px",
+  opacity:0.7
 };
 
 const timelineStyle={
