@@ -5,8 +5,6 @@ const limiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-
-  // ⭐ allow preflight requests
   skip: (req) => req.method === "OPTIONS"
 });
 

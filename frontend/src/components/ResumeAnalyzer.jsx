@@ -72,16 +72,21 @@ const ResumeAnalyzer = () => {
   const score = scoreMatch ? scoreMatch[1] : null;
 
   const atsMatch = analysis.match(/ATS Score:\s*(\d+)/);
-const atsScore = atsMatch ? atsMatch[1] : null;
+  const atsScore = atsMatch ? atsMatch[1] : null;
+
+  /* NEW — Skill Gap Match Score detection */
+
+  const matchScoreMatch = analysis.match(/Match Score:\s*(\d+)/i);
+  const matchScore = matchScoreMatch ? matchScoreMatch[1] : null;
 
   let scoreColor = "#22c55e";
   if (score < 80) scoreColor = "#f59e0b";
   if (score < 60) scoreColor = "#ef4444";
 
-  const cleanedAnalysis = analysis.replace(/Resume Score:\s*\d+\/?\d*/i, "");
-
-
- 
+  const cleanedAnalysis = analysis
+    .replace(/Resume Score:\s*\d+\/?\d*/i, "")
+    .replace(/ATS Score:\s*\d+\/?\d*/i, "")
+    .replace(/Match Score:\s*\d+\/?\d*/i, "");
 
   const formatSections = (text) => {
 
@@ -258,8 +263,6 @@ const atsScore = atsMatch ? atsMatch[1] : null;
   </select>
 </div>
 
-
-
         <input
           type="file"
           accept=".pdf"
@@ -290,6 +293,8 @@ const atsScore = atsMatch ? atsMatch[1] : null;
         )}
 
       </div>
+
+      {/* Rest of UI unchanged */}
 
       {score && (
         <div
@@ -334,7 +339,49 @@ const atsScore = atsMatch ? atsMatch[1] : null;
         </div>
       )}
 
- {atsScore && (
+      {atsScore && (
+        <div
+          style={{
+            background: "#111827",
+            padding: "25px",
+            borderRadius: "12px",
+            marginBottom: "25px",
+            color: "white"
+          }}
+        >
+
+          <h3 style={{ marginBottom: "10px" }}>
+            ATS Compatibility Score
+          </h3>
+
+          <div
+            style={{
+              width: "100%",
+              background: "#374151",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
+            }}
+          >
+
+            <div
+              style={{
+                width: `${atsScore}%`,
+                background: "#3b82f6",
+                height: "100%",
+                transition: "width 0.8s ease"
+              }}
+            />
+
+          </div>
+
+          <p style={{ marginTop: "10px", color: "#9ca3af" }}>
+            {atsScore}/100
+          </p>
+
+        </div>
+      )}
+      {matchScore && (
   <div
     style={{
       background: "#111827",
@@ -346,7 +393,7 @@ const atsScore = atsMatch ? atsMatch[1] : null;
   >
 
     <h3 style={{ marginBottom: "10px" }}>
-      ATS Compatibility Score
+      Role Match Score
     </h3>
 
     <div
@@ -361,8 +408,8 @@ const atsScore = atsMatch ? atsMatch[1] : null;
 
       <div
         style={{
-          width: `${atsScore}%`,
-          background: "#3b82f6",
+          width: `${matchScore}%`,
+          background: "#22c55e",
           height: "100%",
           transition: "width 0.8s ease"
         }}
@@ -371,17 +418,11 @@ const atsScore = atsMatch ? atsMatch[1] : null;
     </div>
 
     <p style={{ marginTop: "10px", color: "#9ca3af" }}>
-      {atsScore}/100
+      {matchScore}/100
     </p>
 
   </div>
 )}
-
-
-
-
-
-      {/* Analysis */}
 
       {analysis && (
         <div
