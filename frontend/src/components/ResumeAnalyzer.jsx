@@ -227,31 +227,33 @@ const ResumeAnalyzer = () => {
       <div
         style={{
           background:
-            "radial-gradient(circle at top left, rgba(34,197,94,0.15), transparent 40%), radial-gradient(circle at bottom right, rgba(59,130,246,0.15), transparent 40%), #0f172a",
-          padding: "30px",
-          borderRadius: "12px",
-          marginBottom: "25px",
+            "radial-gradient(circle at top left, rgba(34,197,94,0.25), transparent 40%), radial-gradient(circle at bottom right, rgba(59,130,246,0.25), transparent 40%), #0f172a",
+          padding: "40px",
+          borderRadius: "18px",
+          marginBottom: "30px",
           color: "white",
-          border: "2px dashed #374151",
+          border: "1px solid rgba(255,255,255,0.08)",
           textAlign: "center",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.35)"
+          boxShadow: "0 25px 60px rgba(0,0,0,0.7)",
+          backdropFilter: "blur(18px)"
         }}
       >
 
-        <p style={{ marginBottom: "10px", fontSize: "16px" }}>
+        <p style={{ marginBottom: "12px", fontSize: "18px", fontWeight:"600", color:"#e2e8f0" }}>
           Upload your resume (PDF)
         </p>
 
-<div style={{ marginBottom: "15px" }}>
+<div style={{ marginBottom: "18px" }}>
   <select
     value={role}
     onChange={(e) => setRole(e.target.value)}
     style={{
-      padding: "8px",
-      borderRadius: "6px",
-      background: "#1e293b",
-      color: "white",
-      border: "1px solid #374151"
+      padding: "10px 14px",
+      borderRadius: "8px",
+      background: "#020617",
+      color: "#e2e8f0",
+      border: "1px solid rgba(255,255,255,0.1)",
+      width:"240px"
     }}
   >
     <option value="">Select Target Role</option>
@@ -263,25 +265,42 @@ const ResumeAnalyzer = () => {
   </select>
 </div>
 
+<div style={{
+background:"#020617",
+padding:"10px 15px",
+borderRadius:"8px",
+border:"1px solid rgba(255,255,255,0.1)",
+display:"inline-block"
+}}>
         <input
           type="file"
           accept=".pdf"
           onChange={(e) => setFile(e.target.files[0])}
         />
+</div>
 
         <br /><br />
+
+<p style={{ fontSize:"13px", color:"#94a3b8" }}>
+AI will analyze your resume and generate insights
+</p>
 
         <button
           onClick={uploadResume}
           disabled={loading}
           style={{
-            padding: "10px 18px",
-            borderRadius: "8px",
+            padding: "12px 24px",
+            borderRadius: "10px",
             border: "none",
-            background: "#22c55e",
+            background: "linear-gradient(135deg, #22c55e, #4ade80)",
             color: "white",
-            cursor: "pointer"
+            cursor: "pointer",
+            fontWeight:"600",
+            boxShadow:"0 8px 20px rgba(34,197,94,0.3)",
+            transition:"all 0.2s ease"
           }}
+          onMouseEnter={e => e.target.style.transform="scale(1.05)"}
+          onMouseLeave={e => e.target.style.transform="scale(1)"}
         >
           {loading ? "Analyzing Resume..." : "Analyze Resume"}
         </button>
@@ -301,13 +320,14 @@ const ResumeAnalyzer = () => {
           style={{
             background: "#111827",
             padding: "25px",
-            borderRadius: "12px",
+            borderRadius: "14px",
             marginBottom: "25px",
-            color: "white"
+            color: "white",
+            boxShadow:"0 10px 25px rgba(0,0,0,0.5)"
           }}
         >
 
-          <h3 style={{ marginBottom: "10px" }}>
+          <h3 style={{ marginBottom: "10px", color:"#e2e8f0" }}>
             Resume Score
           </h3>
 
@@ -344,13 +364,14 @@ const ResumeAnalyzer = () => {
           style={{
             background: "#111827",
             padding: "25px",
-            borderRadius: "12px",
+            borderRadius: "14px",
             marginBottom: "25px",
-            color: "white"
+            color: "white",
+            boxShadow:"0 10px 25px rgba(0,0,0,0.5)"
           }}
         >
 
-          <h3 style={{ marginBottom: "10px" }}>
+          <h3 style={{ marginBottom: "10px", color:"#e2e8f0" }}>
             ATS Compatibility Score
           </h3>
 
@@ -381,18 +402,20 @@ const ResumeAnalyzer = () => {
 
         </div>
       )}
+
       {matchScore && (
   <div
     style={{
       background: "#111827",
       padding: "25px",
-      borderRadius: "12px",
+      borderRadius: "14px",
       marginBottom: "25px",
-      color: "white"
+      color: "white",
+      boxShadow:"0 10px 25px rgba(0,0,0,0.5)"
     }}
   >
 
-    <h3 style={{ marginBottom: "10px" }}>
+    <h3 style={{ marginBottom: "10px", color:"#e2e8f0" }}>
       Role Match Score
     </h3>
 
@@ -429,12 +452,13 @@ const ResumeAnalyzer = () => {
           style={{
             background: "#0f172a",
             padding: "25px",
-            borderRadius: "12px",
-            color: "white"
+            borderRadius: "14px",
+            color: "white",
+            boxShadow:"0 15px 35px rgba(0,0,0,0.7)"
           }}
         >
 
-          <h3 style={{ marginBottom: "20px" }}>
+          <h3 style={{ marginBottom: "20px", color:"#e2e8f0" }}>
             Resume Analysis
           </h3>
 

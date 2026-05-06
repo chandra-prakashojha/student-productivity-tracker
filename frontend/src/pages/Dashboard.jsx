@@ -124,16 +124,16 @@ return(
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
 <div style={statsGrid}>
-<div style={skeletonCard}/>
-<div style={skeletonCard}/>
-<div style={skeletonCard}/>
-<div style={skeletonCard}/>
-<div style={skeletonCard}/>
+<div className="dashboard-card" style={skeletonCard}></div>
+<div className="dashboard-card" style={skeletonCard}></div>
+<div className="dashboard-card" style={skeletonCard}></div>
+<div className="dashboard-card" style={skeletonCard}></div>
+<div className="dashboard-card" style={skeletonCard}></div>
 </div>
 
 <div style={chartGrid}>
-<div style={skeletonChart}/>
-<div style={skeletonChart}/>
+<div className="chart-container" style={skeletonChart}></div>
+<div className="chart-container" style={skeletonChart}></div>
 </div>
 
 </DashboardLayout>
@@ -148,9 +148,29 @@ return(
 
 <h1 style={{marginBottom:"30px"}}>Dashboard</h1>
 
-<div style={{marginBottom:"40px"}}>
-<h2>Resume Analyzer</h2>
+<div style={{marginBottom:"50px"}}>
+
+<h2 style={{
+fontSize:"22px",
+marginBottom:"15px",
+color:"#e2e8f0"
+}}>
+Resume Analyzer
+</h2>
+
+<div style={{
+background:"linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.15))",
+border:"1px solid rgba(255,255,255,0.08)",
+borderRadius:"18px",
+padding:"30px",
+boxShadow:"0 20px 50px rgba(0,0,0,0.6)",
+backdropFilter:"blur(18px)"
+}}>
+
 <ResumeAnalyzer />
+
+</div>
+
 </div>
 
 {/* Stats Cards */}
@@ -166,10 +186,11 @@ scale:1.05,
 y:-6,
 boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
 }}
+className="dashboard-card card-purple"
 style={card}
 >
 <h3 style={cardTitle}><Users size={18}/> Total Students</h3>
-<p><CountUp end={stats.students} duration={1.2}/></p>
+<p className="card-value"><CountUp end={stats.students} duration={1.2}/></p>
 </motion.div>
 
 <motion.div
@@ -181,10 +202,11 @@ scale:1.05,
 y:-6,
 boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
 }}
+className="dashboard-card card-blue"
 style={card}
 >
 <h3 style={cardTitle}><Briefcase size={18}/> Total Applications</h3>
-<p><CountUp end={stats.applications} duration={1.2}/></p>
+<p className="card-value"><CountUp end={stats.applications} duration={1.2}/></p>
 </motion.div>
 
 <motion.div
@@ -196,10 +218,11 @@ scale:1.05,
 y:-6,
 boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
 }}
+className="dashboard-card card-yellow"
 style={card}
 >
 <h3 style={cardTitle}><Calendar size={18}/> Interviews</h3>
-<p><CountUp end={stats.interviews} duration={1.2}/></p>
+<p className="card-value"><CountUp end={stats.interviews} duration={1.2}/></p>
 </motion.div>
 
 <motion.div
@@ -211,10 +234,11 @@ scale:1.05,
 y:-6,
 boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
 }}
+className="dashboard-card card-green"
 style={card}
 >
 <h3 style={cardTitle}><Trophy size={18}/> Offers</h3>
-<p><CountUp end={stats.offers} duration={1.2}/></p>
+<p className="card-value"><CountUp end={stats.offers} duration={1.2}/></p>
 </motion.div>
 
 <motion.div
@@ -226,10 +250,11 @@ scale:1.05,
 y:-6,
 boxShadow:"0px 12px 35px rgba(59,130,246,0.35)"
 }}
+className="dashboard-card card-pink"
 style={card}
 >
 <h3 style={cardTitle}><TrendingUp size={18}/> Offer Rate</h3>
-<p><CountUp end={successRate} duration={1.2}/> %</p>
+<p className="card-value"><CountUp end={successRate} duration={1.2}/> %</p>
 </motion.div>
 
 </div>
@@ -238,9 +263,9 @@ style={card}
 
 <div style={chartGrid}>
 
-<div style={chartCard}>
+<div className="chart-container" style={chartCard}>
 
-<h3 style={{marginBottom:"20px"}}>
+<h3 className="chart-title" style={{marginBottom:"20px"}}>
 Application Status
 </h3>
 
@@ -268,9 +293,9 @@ label
 
 </div>
 
-<div style={chartCard}>
+<div className="chart-container" style={chartCard}>
 
-<h3 style={{marginBottom:"20px"}}>
+<h3 className="chart-title" style={{marginBottom:"20px"}}>
 Application Trend
 </h3>
 
@@ -302,41 +327,119 @@ strokeWidth={3}
 
 <div style={recentCard}>
 
-<h3 style={{marginBottom:"20px"}}>
+<h3
+style={{
+marginBottom:"20px",
+color:"white",
+fontSize:"22px"
+}}
+>
 Recent Applications
 </h3>
 
-<table style={{width:"100%",color:"white"}}>
+<div
+style={{
+display:"flex",
+flexDirection:"column",
+gap:"16px"
+}}
+>
 
-<thead>
-<tr>
-<th align="left">Company</th>
-<th align="left">Role</th>
-<th align="left">Status</th>
-</tr>
-</thead>
+{recentApps.length===0 ? (
 
-<tbody>
-
-{recentApps.length===0?(
-<tr>
-<td colSpan="3">
+<div
+style={{
+padding:"30px",
+borderRadius:"16px",
+background:"rgba(255,255,255,0.03)",
+border:"1px dashed rgba(255,255,255,0.1)",
+textAlign:"center",
+color:"#94a3b8"
+}}
+>
 No recent applications
-</td>
-</tr>
-):(
-recentApps.map(app=>(
-<tr key={app._id}>
-<td>{app.company}</td>
-<td>{app.role}</td>
-<td>{app.status}</td>
-</tr>
-))
+</div>
+
+) : (
+
+recentApps.map((app)=>{
+
+const statusColors={
+Applied:"#3b82f6",
+Interview:"#10b981",
+Rejected:"#ef4444"
+};
+
+return(
+
+<motion.div
+key={app._id}
+whileHover={{
+scale:1.01,
+y:-3
+}}
+style={{
+background:"rgba(255,255,255,0.03)",
+border:"1px solid rgba(255,255,255,0.06)",
+padding:"18px",
+borderRadius:"16px",
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+transition:"0.2s"
+}}
+>
+
+<div>
+
+<h4
+style={{
+margin:0,
+color:"white",
+fontSize:"17px"
+}}
+>
+{
+typeof app.companyId === "object"
+? app.companyId.name
+: "Unknown Company"
+}
+</h4>
+
+<p
+style={{
+marginTop:"6px",
+marginBottom:0,
+color:"#94a3b8"
+}}
+>
+{app.role}
+</p>
+
+</div>
+
+<div
+style={{
+padding:"8px 14px",
+borderRadius:"999px",
+background:`${statusColors[app.status]}20`,
+color:statusColors[app.status],
+fontWeight:"600",
+fontSize:"14px"
+}}
+>
+{app.status}
+</div>
+
+</motion.div>
+
+);
+
+})
+
 )}
 
-</tbody>
-
-</table>
+</div>
 
 </div>
 
@@ -361,10 +464,13 @@ marginBottom:"40px"
 };
 
 const card={
-background:"#0f172a",
+background:"linear-gradient(145deg, #0f172a, #020617)",
 padding:"25px",
-borderRadius:"10px",
-textAlign:"center"
+borderRadius:"16px",
+textAlign:"center",
+border:"1px solid rgba(99,102,241,0.15)",
+boxShadow:"0 10px 25px rgba(0,0,0,0.6)",
+transition:"all 0.25s ease"
 };
 
 const cardTitle={
@@ -375,9 +481,11 @@ gap:"8px"
 };
 
 const chartCard={
-background:"#0f172a",
+background:"#020617",
 padding:"25px",
-borderRadius:"10px"
+borderRadius:"18px",
+border:"1px solid rgba(255,255,255,0.05)",
+boxShadow:"0 15px 35px rgba(0,0,0,0.7)"
 };
 
 const recentCard={

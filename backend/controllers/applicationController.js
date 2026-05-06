@@ -163,10 +163,15 @@ export const getRecentApplications = async (req, res) => {
     }
 
     const apps = await Application
-      .find(query)
-      .populate("companyId")
-      .sort({ createdAt: -1 })
-      .limit(5);
+  .find(query)
+  .populate({
+    path: "companyId",
+    select: "name"
+  })
+  .sort({ createdAt: -1 })
+  .limit(5);
+
+console.log(apps);
 
     res.json(apps);
 

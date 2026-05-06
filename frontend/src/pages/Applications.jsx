@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useEffect, useState, useContext } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import {
@@ -285,83 +286,103 @@ const Applications = () => {
 
         </div>
 
+<div style={applicationsContainer}>
 
-        <div style={tableContainer}>
+{currentApplications.length === 0 ?(
 
-          <table style={table}>
+<div style={emptyState}>
+No applications found
+</div>
 
-            <thead>
+) : (
 
-              <tr>
-                <th align="left">Company</th>
-                <th align="left">Role</th>
-                <th align="left">Status</th>
-                <th align="left">Actions</th>
-              </tr>
+  currentApplications.map((app) => (
 
-            </thead>
+    <motion.div
+      key={app._id}
+      whileHover={{
+        y:-4,
+        scale:1.01
+      }}
+      transition={{ duration:0.2 }}
+      style={applicationCard}
+      onClick={() => window.location.href = `/applications/${app._id}`}
+    >
 
-            <tbody>
+      <div style={applicationLeft}>
 
-              {currentApplications.length === 0 ?(
+        <div style={companyLogo}>
+          {
+            (app.companyId?.name || "U")
+            .charAt(0)
+            .toUpperCase()
+          }
+        </div>
 
-                <tr>
-                  <td colSpan="4">No applications found</td>
-                </tr>
+        <div>
 
-              ):(
-                currentApplications.map(app=>(
+          <h3 style={companyName}>
+            {
+              app.companyId?.name ||
+              companies.find(c => c._id === app.companyId)?.name ||
+              "Unknown"
+            }
+          </h3>
 
-                    <tr
-                   key={app._id}
-                    style={{ cursor: "pointer" }}
-                     onClick={() => window.location.href = `/applications/${app._id}`}
-                      >
+          <p style={roleText}>
+            {app.role}
+          </p>
 
-                    <td>
-                      {app.companyId?.name ||
-                       companies.find(c => c._id === app.companyId)?.name ||
-                       "Unknown"}
-                    </td>
-
-                    <td>{app.role}</td>
-
-                    <td>
-                      <span style={statusBadge(app.status)}>
-                        {app.status}
-                      </span>
-                    </td>
-
-                    <td>
-
-                      <button
-                        style={editBtn}
-                        onClick={()=>handleEdit(app)}
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        style={deleteBtn}
-                        onClick={()=>handleDelete(app._id)}
-                      >
-                        Delete
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))
-              )}
-
-            </tbody>
-
-          </table>
+          <p style={dateText}>
+            Applied on {new Date(app.createdAt).toLocaleDateString()}
+          </p>
 
         </div>
 
       </div>
+
+      <div style={applicationRight}>
+
+        <span style={premiumStatus(app.status)}>
+          {app.status}
+        </span>
+
+        <div style={{
+          display:"flex",
+          gap:"10px"
+        }}>
+
+          <button
+            style={iconEditBtn}
+            onClick={(e)=>{
+              e.stopPropagation();
+              handleEdit(app);
+            }}
+          >
+            Edit
+          </button>
+
+          <button
+            style={iconDeleteBtn}
+            onClick={(e)=>{
+              e.stopPropagation();
+              handleDelete(app._id);
+            }}
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    </motion.div>
+
+  ))
+
+)}
+
+</div>
 
 
       {showModal &&(
@@ -438,6 +459,7 @@ const Applications = () => {
         </div>
 
       )}
+</div>
 
     </DashboardLayout>
 
@@ -456,14 +478,127 @@ const addButton={
   borderRadius:"6px",
   cursor:"pointer"
 };
-
 const exportButton={
-  background:"#10b981",
-  color:"white",
-  border:"none",
-  padding:"10px 16px",
-  borderRadius:"6px",
-  cursor:"pointer"
+background:"#10b981",
+color:"white",
+border:"none",
+padding:"10px 16px",
+borderRadius:"6px",
+cursor:"pointer"
+};
+
+const applicationsContainer={
+display:"flex",
+flexDirection:"column",
+gap:"18px"
+};
+
+const applicationCard={
+background:"rgba(15,23,42,0.95)",
+border:"1px solid rgba(255,255,255,0.06)",
+borderRadius:"20px",
+padding:"22px",
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+backdropFilter:"blur(14px)",
+boxShadow:"0 10px 25px rgba(0,0,0,0.35)",
+cursor:"pointer"
+};
+
+const applicationLeft={
+display:"flex",
+alignItems:"center",
+gap:"18px"
+};
+
+const companyLogo={
+width:"58px",
+height:"58px",
+borderRadius:"18px",
+background:"linear-gradient(135deg,#2563eb,#3b82f6)",
+display:"flex",
+alignItems:"center",
+justifyContent:"center",
+fontWeight:"700",
+fontSize:"20px",
+color:"white",
+boxShadow:"0 10px 20px rgba(37,99,235,0.35)"
+};
+
+const companyName={
+margin:0,
+color:"white",
+fontSize:"20px",
+fontWeight:"700"
+};
+
+const roleText={
+margin:"6px 0",
+color:"#cbd5e1",
+fontSize:"16px"
+};
+
+const dateText={
+margin:0,
+fontSize:"13px",
+color:"#64748b"
+};
+
+const applicationRight={
+display:"flex",
+alignItems:"center",
+gap:"18px"
+};
+
+const premiumStatus=(status)=>{
+
+const colors={
+Applied:["#2563eb","rgba(37,99,235,0.18)"],
+Interview:["#f59e0b","rgba(245,158,11,0.18)"],
+Offer:["#10b981","rgba(16,185,129,0.18)"],
+Rejected:["#ef4444","rgba(239,68,68,0.18)"]
+};
+
+return{
+background:colors[status]?.[1],
+color:colors[status]?.[0],
+padding:"10px 16px",
+borderRadius:"999px",
+fontWeight:"600",
+fontSize:"14px",
+border:`1px solid ${colors[status]?.[0]}30`
+};
+
+};
+
+const iconEditBtn={
+background:"rgba(37,99,235,0.15)",
+border:"1px solid rgba(37,99,235,0.25)",
+color:"#60a5fa",
+padding:"10px 16px",
+borderRadius:"12px",
+cursor:"pointer",
+fontWeight:"600"
+};
+
+const iconDeleteBtn={
+background:"rgba(239,68,68,0.15)",
+border:"1px solid rgba(239,68,68,0.25)",
+color:"#f87171",
+padding:"10px 16px",
+borderRadius:"12px",
+cursor:"pointer",
+fontWeight:"600"
+};
+
+const emptyState={
+background:"rgba(15,23,42,0.9)",
+border:"1px dashed rgba(255,255,255,0.08)",
+padding:"40px",
+borderRadius:"20px",
+textAlign:"center",
+color:"#94a3b8"
 };
 
 const tableContainer={
