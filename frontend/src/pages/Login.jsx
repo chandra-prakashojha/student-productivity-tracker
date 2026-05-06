@@ -22,7 +22,6 @@ const Login = () => {
 
   };
 
-
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -33,10 +32,8 @@ const Login = () => {
 
       const res = await API.post("/auth/login",form);
 
-      // save token
       localStorage.setItem("token",res.data.token);
 
-      // save user (important for role based UI)
       localStorage.setItem("user",JSON.stringify(res.data.user));
 
       navigate("/dashboard");
@@ -52,7 +49,6 @@ const Login = () => {
     }
 
   };
-
 
   return(
 

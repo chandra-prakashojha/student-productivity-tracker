@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../api/axios";
 
 const Register = () => {
 
@@ -17,15 +17,26 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     try {
-      await axios.post("/api/auth/register", form);
+
+      const res = await API.post("/auth/register", form);
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
       alert("Registered Successfully");
+
     } catch (err) {
+
       console.log(err);
-      alert("Error registering user");
+
+      alert(err.response?.data?.message || "Registration failed");
+
     }
+
   };
 
   return (
@@ -71,11 +82,10 @@ const Register = () => {
       </button>
 
     </form>
+
   );
+
 };
-
-
-/* 🔥 STYLES */
 
 const formContainer = {
   display: "flex",
