@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://placify-a-smart-placement-tracker.onrender.com"
+  baseURL: "https://placify-a-smart-placement-tracker.onrender.com/api"
 });
 
 API.interceptors.request.use((req) => {
