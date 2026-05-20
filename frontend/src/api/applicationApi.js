@@ -1,5 +1,4 @@
 import API from "./axios";
-import axios from "axios";
 
 /* Get all applications */
 export const getApplications = async () => {
@@ -12,20 +11,16 @@ export const getApplications = async () => {
   }
 };
 
-
 /* Create a new application */
-export const createApplication = (data) => {
-  return axios.post(
-    "/api/applications",
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    }
-  );
+export const createApplication = async (data) => {
+  try {
+    const res = await API.post("/applications", data);
+    return res.data;
+  } catch (err) {
+    console.error("Error creating application:", err);
+    throw err;
+  }
 };
-
 
 /* Update an application */
 export const updateApplication = async (id, data) => {
@@ -38,7 +33,6 @@ export const updateApplication = async (id, data) => {
   }
 };
 
-
 /* Delete an application */
 export const deleteApplication = async (id) => {
   try {
@@ -49,8 +43,20 @@ export const deleteApplication = async (id) => {
     throw err;
   }
 };
-export const addInterviewRound = (id, data) =>
-  axios.post(`/applications/${id}/interview-round`, data);
+
+/* Add interview round */
+export const addInterviewRound = async (id, data) => {
+  try {
+    const res = await API.post(
+      `/applications/${id}/interview-round`,
+      data
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error adding interview round:", err);
+    throw err;
+  }
+};
 
 /* Get recent applications (Dashboard) */
 export const getRecentApplications = async () => {
