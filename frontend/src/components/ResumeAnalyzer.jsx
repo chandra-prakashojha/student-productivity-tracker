@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../api/axiosConfig";
+import API from "../api/axios";
 
 const ResumeAnalyzer = () => {
 
@@ -26,7 +26,7 @@ const ResumeAnalyzer = () => {
       formData.append("resume", file);
       formData.append("role", role);
 
-      const response = await axios.post(
+      const response = await API.post(
         "/resume/analyze",
         formData,
         {
